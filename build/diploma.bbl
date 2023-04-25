@@ -1,0 +1,244 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{Castagna_2016}{thesis}{}
+      \name{author}{3}{}{%
+        {{hash=09525a633b0ac72424537eae41ec57e8}{%
+           family={Castagna},
+           familyi={C\bibinitperiod},
+           given={Giuseppe},
+           giveni={G\bibinitperiod}}}%
+        {{hash=e96d2c5ed19adc8f456f3de725212ef2}{%
+           family={Petrucciani},
+           familyi={P\bibinitperiod},
+           given={Tommaso},
+           giveni={T\bibinitperiod}}}%
+        {{hash=5e9085f6c98168e30d1e02c1a6aa59bf}{%
+           family={Nguyen},
+           familyi={N\bibinitperiod},
+           given={Kim},
+           giveni={K\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {ACM}%
+      }
+      \strng{namehash}{691168b6f0afdea0e01d9e9f58ce684a}
+      \strng{fullhash}{691168b6f0afdea0e01d9e9f58ce684a}
+      \strng{bibnamehash}{691168b6f0afdea0e01d9e9f58ce684a}
+      \strng{authorbibnamehash}{691168b6f0afdea0e01d9e9f58ce684a}
+      \strng{authornamehash}{691168b6f0afdea0e01d9e9f58ce684a}
+      \strng{authorfullhash}{691168b6f0afdea0e01d9e9f58ce684a}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the 21st {ACM} {SIGPLAN} International Conference on Functional Programming}
+      \field{month}{9}
+      \field{title}{Set-theoretic types for polymorphic variants}
+      \field{year}{2016}
+      \verb{doi}
+      \verb 10.1145/2951913.2951928
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145%2F2951913.2951928
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145%2F2951913.2951928
+      \endverb
+    \endentry
+    \entry{Castagna_2015}{thesis}{}
+      \name{author}{4}{}{%
+        {{hash=09525a633b0ac72424537eae41ec57e8}{%
+           family={Castagna},
+           familyi={C\bibinitperiod},
+           given={Giuseppe},
+           giveni={G\bibinitperiod}}}%
+        {{hash=5e9085f6c98168e30d1e02c1a6aa59bf}{%
+           family={Nguyen},
+           familyi={N\bibinitperiod},
+           given={Kim},
+           giveni={K\bibinitperiod}}}%
+        {{hash=a14df3bf24de056179f8280c4befd946}{%
+           family={Xu},
+           familyi={X\bibinitperiod},
+           given={Zhiwu},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=e3ef5eb75cf37b8ccaca3498b124793f}{%
+           family={Abate},
+           familyi={A\bibinitperiod},
+           given={Pietro},
+           giveni={P\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{2dc5bfb3252927ee85b38a4f8f62f541}
+      \strng{fullhash}{78391e793c35f7811f4e90a1b416d604}
+      \strng{bibnamehash}{2dc5bfb3252927ee85b38a4f8f62f541}
+      \strng{authorbibnamehash}{2dc5bfb3252927ee85b38a4f8f62f541}
+      \strng{authornamehash}{2dc5bfb3252927ee85b38a4f8f62f541}
+      \strng{authorfullhash}{78391e793c35f7811f4e90a1b416d604}
+      \field{sortinit}{C}
+      \field{sortinithash}{4d103a86280481745c9c897c925753c0}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{This article is the second part of a two articles series about the definition of higher order polymorphic functions in a type system with recursive types and set-theoretic type connectives (unions, intersections, and negations).In the first part, presented in a companion paper, we defined and studied the syntax, semantics, and evaluation of the explicitly-typed version of a calculus, in which type instantiation is driven by explicit instantiation annotations. In this second part we present a local type inference system that allows the programmer to omit explicit instantiation annotations for function applications, and a type reconstruction system that allows the programmer to omit explicit type annotations for function definitions.The work presented in the two articles provides the theoretical foundations and technical machinery needed to design and implement higher-order polymorphic functional languages with union and intersection types and/or for semi-structured data processing.}
+      \field{issn}{0362-1340}
+      \field{journaltitle}{SIGPLAN Not.}
+      \field{month}{1}
+      \field{number}{1}
+      \field{title}{Polymorphic Functions with Set-Theoretic Types: Part 2: Local Type Inference and Type Reconstruction}
+      \field{volume}{50}
+      \field{year}{2015}
+      \field{pages}{289\bibrangedash 302}
+      \range{pages}{14}
+      \verb{doi}
+      \verb 10.1145/2775051.2676991
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/2775051.2676991
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/2775051.2676991
+      \endverb
+      \keyw{semantic subtyping,type constraints,intersection types,polymorphism,xml,types}
+    \endentry
+    \entry{Garrigue_1998}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=afd798828c50cc237b473922c42b9658}{%
+           family={Garrigue},
+           familyi={G\bibinitperiod},
+           given={Jacques},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {ACM SIGPLAN Workshop on ML}%
+      }
+      \strng{namehash}{afd798828c50cc237b473922c42b9658}
+      \strng{fullhash}{afd798828c50cc237b473922c42b9658}
+      \strng{bibnamehash}{afd798828c50cc237b473922c42b9658}
+      \strng{authorbibnamehash}{afd798828c50cc237b473922c42b9658}
+      \strng{authornamehash}{afd798828c50cc237b473922c42b9658}
+      \strng{authorfullhash}{afd798828c50cc237b473922c42b9658}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Programming with Polymorphic Variants}
+      \field{year}{1998}
+      \verb{urlraw}
+      \verb https://caml.inria.fr/pub/papers/garrigue-polymorphic_variants-ml98.pdf
+      \endverb
+      \verb{url}
+      \verb https://caml.inria.fr/pub/papers/garrigue-polymorphic_variants-ml98.pdf
+      \endverb
+    \endentry
+    \entry{Hindley_1969}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=602b57ea41fd91e27779464cdf482b63}{%
+           family={Hindley},
+           familyi={H\bibinitperiod},
+           given={R.},
+           giveni={R\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {American Mathematical Society}%
+      }
+      \strng{namehash}{602b57ea41fd91e27779464cdf482b63}
+      \strng{fullhash}{602b57ea41fd91e27779464cdf482b63}
+      \strng{bibnamehash}{602b57ea41fd91e27779464cdf482b63}
+      \strng{authorbibnamehash}{602b57ea41fd91e27779464cdf482b63}
+      \strng{authornamehash}{602b57ea41fd91e27779464cdf482b63}
+      \strng{authorfullhash}{602b57ea41fd91e27779464cdf482b63}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{00029947}
+      \field{journaltitle}{Transactions of the American Mathematical Society}
+      \field{title}{The Principal Type-Scheme of an Object in Combinatory Logic}
+      \field{volume}{146}
+      \field{year}{1969}
+      \field{pages}{29\bibrangedash 60}
+      \range{pages}{32}
+      \verb{urlraw}
+      \verb http://www.jstor.org/stable/1995158
+      \endverb
+      \verb{url}
+      \verb http://www.jstor.org/stable/1995158
+      \endverb
+    \endentry
+    \entry{Milner_1978}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=b2f5936dc874ec167c9911352b5cae01}{%
+           family={Milner},
+           familyi={M\bibinitperiod},
+           given={Robin},
+           giveni={R\bibinitperiod}}}%
+      }
+      \strng{namehash}{b2f5936dc874ec167c9911352b5cae01}
+      \strng{fullhash}{b2f5936dc874ec167c9911352b5cae01}
+      \strng{bibnamehash}{b2f5936dc874ec167c9911352b5cae01}
+      \strng{authorbibnamehash}{b2f5936dc874ec167c9911352b5cae01}
+      \strng{authornamehash}{b2f5936dc874ec167c9911352b5cae01}
+      \strng{authorfullhash}{b2f5936dc874ec167c9911352b5cae01}
+      \field{sortinit}{M}
+      \field{sortinithash}{4625c616857f13d17ce56f7d4f97d451}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{0022-0000}
+      \field{journaltitle}{Journal of Computer and System Sciences}
+      \field{number}{3}
+      \field{title}{A theory of type polymorphism in programming}
+      \field{volume}{17}
+      \field{year}{1978}
+      \field{pages}{348\bibrangedash 375}
+      \range{pages}{28}
+      \verb{doi}
+      \verb https://doi.org/10.1016/0022-0000(78)90014-4
+      \endverb
+      \verb{urlraw}
+      \verb https://www.sciencedirect.com/science/article/pii/0022000078900144
+      \endverb
+      \verb{url}
+      \verb https://www.sciencedirect.com/science/article/pii/0022000078900144
+      \endverb
+    \endentry
+    \entry{setvariants}{thesis}{}
+      \field{sortinit}{s}
+      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
+      \field{labeltitlesource}{title}
+      \field{note}{Implementations of the set-theoretic types for the subset of the OCaml language. Available online: \url{https://www.cduce.org/ocaml/}, \url{https://www.cduce.org/ocaml/bi}}
+      \field{title}{setvariants}
+      \verb{urlraw}
+      \verb https://gitlab.math.univ-paris-diderot.fr/petrucciani/setvariants
+      \endverb
+      \verb{url}
+      \verb https://gitlab.math.univ-paris-diderot.fr/petrucciani/setvariants
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

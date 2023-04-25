@@ -1,0 +1,599 @@
+\documentclass[a4paper,11pt,oneside]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper,top=3cm,bottom=3cm,left=3cm,right=3cm]{geometry}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{helvet}
+\usepackage{stmaryrd}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{thmtools}
+\usepackage[english]{babel}     %% typographie française
+\usepackage{textgreek}
+\usepackage[style=numeric,language=english]{biblatex}
+\usepackage{parskip}		%% blank lines between paragraphs, no indent
+\usepackage[margin=1cm]{caption}%% give long captions a margin
+\usepackage{booktabs}           %% typesetting nice tables
+\usepackage[pdftex]{graphicx}	%% include graphics, preferably pdf
+\usepackage[pdftex]{hyperref}	%% many PDF options can be set here
+\pdfadjustspacing=1		%% force LaTeX-like character spacing
+
+\addbibresource{citations.bib}
+
+\theoremstyle{definition}
+\newtheorem{defsec}{Definition}[section]
+\newtheorem{defsubsec}{Definition}[subsection]
+\newtheorem{theosec}{Theorem}[section]
+\newtheorem{theosubsec}{Theorem}[subsection]
+
+\newcommand{\mylastname}{Venediktov}
+\newcommand{\myfirstname}{Roman}
+\newcommand{\mynumber}{30007033}
+\newcommand{\myname}{\myfirstname{} \mylastname{}}
+\newcommand{\mytitle}{Implementation of the Set-Theoretic Types
+                      for Polymorphic Variants in OCaml}
+\newcommand{\mysupervisor}{Prof. Alexander Omelchenko}
+\newcommand{\myrao}{Daniil Berezun}
+\newcommand{\myrat}{Dmitrii Kosarev}
+
+\newcommand{\ta}{'a}
+
+\hypersetup{
+  pdfauthor = {\myname},
+  pdftitle = {\mytitle},
+  pdfkeywords = {OCaml, Polymorphic Variants, type constraints},
+  colorlinks = {true},
+  linkcolor = {blue}
+}
+
+\begin{document}
+\pagenumbering{roman}
+
+\thispagestyle{empty}
+
+\begin{flushright}
+  \includegraphics[scale=0.8]{bsc-logo}
+\end{flushright}
+\vspace*{40mm}
+\begin{center}
+  \huge
+  \textbf{\mytitle}
+\end{center}
+\vspace*{4mm}
+\begin{center}
+  \Large by
+\end{center}
+\vspace*{4mm}
+\begin{center}
+  \LARGE
+  \textbf{\myname}
+\end{center}
+\vspace*{20mm}
+\begin{center}
+  \Large
+  Bachelor Thesis in Computer Science
+\end{center}
+\vfill
+\begin{flushleft}
+  \large
+  Submission: \today \hfill
+  Supervisor: \mysupervisor\\ \hfill
+  Research assistant: \myrao\\ \hfill
+  Research assistant: \myrat\\
+  \rule{\textwidth}{1pt}
+\end{flushleft}
+\begin{center}
+  Constructor University $|$
+  School of Computer Science and Engineering
+\end{center}
+
+\newpage
+
+\section*{Abstract}
+
+Warning: this text is in draft state, in many places in chapters
+2 and 3 todo tags have been left for future formalisation and work.
+Despite this, I have tried to make it coherent and with the expected
+final structure.
+
+Polymorphic variants are a useful feature of the OCaml language, but
+their current implementation relies on kinding constraints to simulate
+subtyping via unification, leading to an awkward formalization and a
+type system with unintuitive and/or unduly restrictive behavior. While
+a set-theoretic type system\cite{Castagna_2016} with semantical subtyping
+has been proposed to address this issue, it has yet to be implemented in
+the OCaml compiler.
+
+This work presents a formalization and implementation of a simplified
+typing system based on set-theoretic types with semantical subtyping in
+the OCaml compiler. This implementation demonstrates the feasibility of
+a mixed-type inference system that combines the classic Hindley-Milner
+algorithm with a system incorporating semantical subtyping and constraint
+solving. The resulting system offers a more intuitive and flexible approach
+to polymorphic variant typing in OCaml, with potential applications in
+software development and type theory research.
+
+\newpage
+\tableofcontents
+
+\clearpage
+\pagenumbering{arabic}
+
+\section{Introduction}
+
+Polymorphic variants are a key feature of OCaml that provide a balance
+between static safety and code reuse while maintaining a concise syntax.
+Initially proposed as a solution to incorporate union types into
+Hindley-Milner (HM) type systems \cite{Garrigue_1998}, polymorphic
+variants cover many of the applications of union types, explaining
+their success. However, their capability is limited to finite enumerations
+of tagged values, rather than forming unions of values of generic types,
+due to the superimposition of a system of kinding constraints on the HM
+type system, which is used to simulate subtyping without actually
+introducing it. The current system reuses the ML type system, including
+unification for type reconstruction, as much as possible. However, this
+approach yields significant complexity, making polymorphic variants difficult
+to understand, especially for beginners. Furthermore, it limits expressiveness
+and prohibits several useful applications that general union types make possible.
+
+In \cite{Castagna_2016}, a system based on set-theoretic types and subtyping was
+proposed, which was shown to be strictly more expressive than the current system,
+typing more programs while preserving type safety. The proposed system removes
+some pathological cases of the current implementation, resulting in a more
+intuitive and predictable type system. The authors demonstrate the superiority
+of their system over the current implementation in three examples where OCaml
+infers imprecise types or classifies them as type errors. Their system types
+them better and does not require excessive constructions from the programmer
+to fix typing problems. While the full implementation of their system is not
+possible due to the absence of Runtime Type Information in OCaml, the authors
+propose a modified system that fixes two of the three given issues and remains
+strictly more expressive than the current implementation.
+
+Although the system proposed in \cite{Castagna_2016} was specifically designed
+for OCaml, and the authors promised an implementation, it was only implemented
+as an external type checker for a subset of OCaml in a separate repository
+\cite{setvariants}. As the implementation of the described system requires
+rewriting a significant part of the OCaml type checker and introducing new basic
+types, it is unlikely that the implementation will be accepted by the community.
+Therefore, we propose a simplified version of the system and conduct an experiment
+to implement it in the existing type checker without strong interop with the other
+subsystems of the OCaml language.
+
+\section{Statement and Motivation of Research}
+
+\subsection{Issues with the current system}
+
+TODO: Examples from the \cite{Castagna_2016}
+
+\subsection{Current OCaml system formalization (K-system)}
+
+The formalization of the OCaml system utilized in this work was
+derived from the paper describing the set-theoretic system \cite{Castagna_2016}.
+A countable set of type variables, denoted by $\alpha$, is assumed to exist.
+Additionally, a finite set of basic types, represented by $b$, is considered,
+with a function $b(\cdot)$ that maps constants to basic types.
+
+\begin{defsec}[Types]
+  A type $\tau$ is a term inductively generated by the following grammar.
+  $$ \tau ::= \alpha\ |\ b\ |\ \tau \rightarrow \tau\ |\ \tau \times \tau $$
+\end{defsec}
+
+The system only uses the types of core ML: any supplementary information
+is represented through the kinds of type variables.
+
+\begin{defsec}[Kinds]
+  A kind $\kappa$ is either the unconstrained kind “•” or a constrained
+  kind, that is, a triple ($L$, $U$, $T$) where:\\
+  - $L$ is a finite set of tags \{$tag_1$, ..., $tag_n$\};\\
+  - $U$ is either a finite set of tags or the set $L$ of all tags;\\
+  - $T$ is a finite set of pairs of a tag and a type, written \{$tag_1 : \tau_1$,
+  ..., $tag_n : \tau_n$\} (its domain $\operatorname{dom}(T)$ is the set of tags occurring
+  in it);\\
+  and where the following conditions hold:\\
+  - $L \subseteq U , L \subseteq \operatorname{dom}(T)$, and,
+  $\operatorname{if} U \not= L \operatorname{then} U \subseteq dom(T)$;\\
+  - Tags in $L$ have a single type in $T$, that is, if $tag \in L$, whenever
+  both $tag : \tau_1 \in T$ and $tag : \tau_2 \in T$, we have $\tau_1 = \tau_2$\\
+\end{defsec}
+
+\begin{defsec}[Type schemes]
+  TODO
+\end{defsec}
+
+\begin{defsec}[Admissibility of a type substitution]
+  TODO
+\end{defsec}
+
+\begin{defsec}[Instances of a type scheme]
+  TODO
+\end{defsec}
+
+The authors of the paper also provide proofs for the theorems of
+progress, subject reduction, and type soundness for the proposed system.
+
+\subsection{Set-theoretic system formalization (S-system)}
+\subsubsection{Formalization}
+
+In their system, subtyping is added using a semantic definition
+based on set-theoretic types, rather than encoding it via
+instantiation. They utilize type connectives and subtyping to
+represent variant types as unions and to encode bounded quantification
+by union and intersection.
+
+As before, we consider a set $V$ of type variables (ranged over by $\alpha$)
+and the sets $C$, $L$, and $B$ of language constants, tags, and
+basic types (ranged over by $c$, $tag$, and $b$ respectively).
+
+\begin{defsec}[Types]
+  A type $\tau$ is a term inductively generated by the following grammar.
+  $$ \tau ::= \alpha\ |\ b\ |\ c\ |\ \tau \rightarrow \tau\ |\ \tau \times \tau\ |\ tag(\tau)\ |\ \tau \cup \tau\ |\ \neg\tau\ |\ 0 $$
+\end{defsec}
+
+\textbf{Variant types and bounded quantification.}
+The S-system encodes bounds and tag-to-content type mappings using standard
+type constructions. For example, to simulate a variable $\alpha$ of kind
+({A}, {A,B}, {A : bool, B : int}) in the S-system, we can use the common
+scheme $(\tau_l \cup \beta) \cap \tau_u$ where $\tau_l$ is the lower bound
+and $\tau_u$ is the upper bound, resulting in
+$(A(bool) \cup \beta) \cap (A(bool) \cup B(int))$.
+
+\textbf{Subtyping.}
+Subtyping is semantically defined as $t_1 \leq t_2$ if and only if
+$\llbracket t_1\rrbracket \subseteq \llbracket t_2\rrbracket$, where
+$\llbracket\cdot\rrbracket$ is an interpretation function mapping types
+to sets of elements from a domain
+(intuitively, the set of values of the language).
+
+\begin{defsec}[Type schemes]
+  TODO
+\end{defsec}
+
+The authors of the paper also provide proofs for the theorems of
+progress, subject reduction, and type soundness for the proposed system.
+
+The authors of the paper have demonstrated that their system extends the K-system
+through a translation of types from K to S and have established that this
+translation preserves the typing relation.
+
+\subsubsection{Type reconstruction}
+
+Type reconstruction for a program (a closed expression) $e$ consists
+in finding a type $t$ such that $\emptyset \vdash S e : t$ can be derived: we see it
+as finding a type substitution $\theta$ such that $\emptyset \vdash S e : \alpha\theta$
+holds for some fresh variable $\alpha$.
+We generalize this to non-closed expressions and
+to reconstruction of types that are partially known. Thus, we say
+that type reconstruction consists — given an expression $e$, a type environment
+$\Gamma$, and a type $t$ — in computing a type substitution $\theta$ such
+that $\Gamma \theta \vdash S e : t\theta$ holds, if any such $\theta$ exists.
+
+Reconstruction in S-system proceeds in two main phases. In
+the first, constraint generation, they generate constraints from
+an expression $e$ and a type $t$ a set of constraints that record the
+conditions under which $e$ may be given type $t$. In the second phase,
+constraint solving, they solve (if possible) these
+constraints to obtain a type substitution $\theta$.
+Solution of the constraint set was done using the "tallying" algorithm
+\cite{Castagna_2015}.
+
+\subsubsection{Issues with the system}
+
+The precision of the type system can lead to fragility, as functions
+with types like "\texttt{string $\setminus$ "Hello"}" may be intimidating
+for programmers.
+
+The non-deterministic nature of the type reconstruction algorithm makes
+it difficult to support in the compiler and comprehend for programmers.
+
+The "tallying" algorithm has certain section where it must iterate
+through all potential solutions at each depth, which can result in
+exponential complexity.
+
+The current implementation of the "tallying" algorithm has bugs and may
+enter a constraint-solving loop.
+
+\section{Proposed system}
+
+\subsection{Formalization}
+
+The main problems for the implementation were identified as the new basic
+types such as "\texttt{1}" or "\texttt{int $\setminus$ 1}". The introduction
+of these types requires rewriting a significant part of the typechecker,
+which could not be done within the scope of this work and is unlikely to
+be accepted by the OCaml community. As a result, we decided to limit the
+use of set-theoretic operations only to the polymorphic variants subsystem.
+
+For the purpose of demonstrating the system, we will reuse the simple
+language of polymorphic variants introduced in Section 2 of \cite{Castagna_2016}.
+
+As before, we consider a set $V$ of type variables (ranged over by $\alpha$)
+and the sets $L$ and $B$ of tags and basic types (ranged over by $tag$, and
+$b$ respectively).
+
+\begin{defsec}[Types]
+  A type \texttau\ is a term inductively generated by the following grammar.
+
+  $$ \tau ::= a\ |\ b\ |\ \tau \rightarrow \tau\ |\ \tau \times \tau\ |\ (\kappa, \tau_t) $$
+  $$ \tau_t = a_t\ |\ tag\ |\ \tau_t \cup \tau_t\ |\ \tau_t \setminus \tau_t\ |\ \top $$
+
+  where $\tau_t$ is the tagged-type and $\kappa$ is the kind of tagged-type.
+\end{defsec}
+
+\begin{defsec}[Kinds]
+  A kind \textkappa\ is, a map from tags to general types (\texttau)
+\end{defsec}
+
+\begin{defsec}[Type schemes]
+  A type scheme \textsigma\ is of the form $\forall A, A_t.\ K \triangleright \tau$, where: \\
+  - $A$ is a finite set \{$\alpha_1$ , ... , $\alpha_n$\} of type variables; \\
+  - $A_t$ is a finite set \{$\alpha_1$ , ... , $\alpha_n$\} of tagged-type variables; \\
+  - $K$ is a kinding environment, that is, a map from tagged-type variables to kinds; \\
+  - $\operatorname{dom}(K) = A_t$
+\end{defsec}
+
+\begin{defsec}[Admissibility of a type scheme]
+  TODO
+\end{defsec}
+
+\begin{defsec}[Admissibility of a type substitution]
+  TODO
+\end{defsec}
+
+\begin{defsec}[Instances of a type scheme]
+  TODO
+\end{defsec}
+
+\begin{defsec}[Compatible Tagged-Types]
+  We say that two tagged-types are compatible if for each tag in their kind
+  mapping, the mapped types are equal. (TODO)
+\end{defsec}
+
+\textbf{Subtyping.} In this system, subtyping is defined as in the S-system,
+but it is only defined on compatible tagged-types.
+
+\subsection{Properties}
+
+\textbf{Theorems of Progress, Subject Reduction, and Type Soundness.}
+
+\textbf{Proof that the Proposed System is the extension of the K-system.}
+
+\textbf{Equivalence of the Proposed System with the S-system for programs without content in tagged values.}
+
+\subsection{Types reconstruction}
+
+Due to the fundamental simplification of the system compared to the S-system,
+the type reconstruction algorithm could also be simplified. However, the main
+idea of the algorithm remains the same as in the S-system, where we collect
+subtyping constraints and solve them. In our case, we solve these constraints
+using just the transitive closure on the graph of constraints.
+
+\textbf{Soundness and completeness of the type reconstruction algorithm}
+
+\section{Implementation of the proposed system}
+
+The main issue with modifying the OCaml type checker is described in the
+\texttt{TODO.md} file in the respective directory:
+{\itshape
+"There is a consensus that the current implementation of the OCaml typechecker
+is overly complex and fragile. A big rewriting "from scratch" might be possible
+or desirable at some point, or not, but incremental cleanup steps are certainly
+accessible and could bring the current implementation in a better shape at a
+relatively small cost and in a reasonably distant future."
+}
+However, since this document was created in 2018 and has
+only been slightly modified until 2020, there is no chance for improvements
+to the type checker codebase in the near future. As a result, we had to work
+with what we had.
+
+The OCaml type checker is based on the Hindley-Milner system \cite{Hindley_1969}
+\cite{Milner_1978}, and inference in this system relies on the "\texttt{unify}"
+function, which is used to find a substitution to make two types equal.
+Unification between types is called syntactically directed, for example,
+between the argument and the left side of the arrow type of the applied
+function. After unification, all the equality constraints are reflected in
+the type, and no further solution is required.
+
+The OCaml type system has been using the Hindley-Milner system since its
+inception 27 years ago, and as a result, the type checker heavily relies
+on the invariants that are specific to the HM system. This leads to a high
+cost of changes that do not preserve such invariants.
+
+\subsection{Collection of subtyping constraints}
+
+In contrast to the Hindley-Milner system, where all type constraints can
+be simply copied from one type to another, the subtyping system connects
+all polymorphic variant types via their constraints. This means that new
+constraints on one type can affect other types through the previously
+established constraints.
+
+The current implementation stores these subtyping constraints in a global
+set, which has some drawbacks. The main issue is that the constraints are
+not preserved during serialization, as there is no pre-serialization phase
+that would allow us to store them in the type. This does not affect the
+typing validity within a single file, and in the case of multiple files,
+the types from other files can be taken from the interface file, which
+preserves all the necessary information in the declaration. The only problem
+arises in cases involving polymorphic variant types, where the implementation
+file's type may not be compatible with the type in the interface file as there
+is no possibility to retrieve the real type of the implemented function during
+the comparison with the one from the interface.
+
+This problem is not fundamental, and there are several solutions to fix it.
+One solution would be to serialize the constraints set or store the constraints
+related to the type in the type. However, both of these solutions would
+significantly increase the size of the serialized file. An optimal solution
+would be to add a finalization phase in which all the constraints can be
+solved and preserved in the tree as another type with only the resulting data.
+
+\subsection{Solving types at the end of constraint collection}
+
+This problem was previously mentioned in the previous section, but it is
+important to state it independently due to its significance. In contrast
+to the HM system, which solves types during expression traversal and
+requires no final phase, the new system needs to post-process the type
+tree to solve all the polymorphic variants. This process may involve
+transforming the tree into another structure. Solving this problem requires
+significant architectural changes and a lot of work, so it has not yet been
+implemented. The current implementation solves polymorphic variant types
+before printing, which works well for now, but better architecture ideas
+should be investigated in the future.
+
+\subsection{Variance in unification}
+
+The main function in the HM system is unification, which is originally
+intended to make types equal. However, since we introduced subtyping, we
+need to modify the unification algorithm to make one type a subtype of the
+other type, rather than making them equal. For most classes, subtyping is
+not defined, so the function will just ignore variance and behave as before.
+The only difference is that we need to control variance changes in cases
+like arrow type.
+
+For polymorphic variant types, we register a subtyping constraint in the
+global set and unify the mappings from the tags to types. For every shared
+tag, we have to unify their mapped types with the same subtyping destination
+as for the whole type. For other tags, we need to create mappings to a new
+% romanv: was not done
+type variable and then unify them, as we do with the shared tags.
+
+\subsection{Inequality after unification}
+
+During the unification process, types were made physically equal by
+assigning a reference to one of them to another. This was a valid
+optimization technique as the types that became equal were expected to
+remain equal forever, and this approach optimized memory usage for the
+compiler. However, with the new semantics, this optimization is no longer
+valid. Therefore, the solution was to remove the optimization and fix all
+the places where the unification algorithm relied on it.
+
+\subsection{Preserving constraints when copying types}
+
+When a function application is typed in OCaml, the type of the original
+function should not be modified. To achieve this, the OCaml type checker
+creates a copy of the function type before unifying its arguments. However,
+as polymorphic variant types are associated with constraints linking them
+to other types, these constraints must be preserved during the copy. For
+instance, the subtyping relation between the result type and the argument
+type must be preserved.
+
+To ensure this, occurrences of polymorphic variant types are tracked during
+the copy, and the constraints associated with each of them are copied after
+the full type copy is completed. Because of this, we are preserving their
+internal relations. Moreover, copied non-internal constraints become marked
+as one-directional, as they should not affect the original type, but only
+become the new constraints for the copied type.
+
+\subsection{Detection of the polymorphic variables in function types}
+
+Consider the following function:
+
+{\ttfamily
+fun f v =\\
+match v with\\
+| `A -> C\\
+| v \ -> v
+}
+
+It is expected to have a type of "\texttt{$\top$ as 'a -> 'a | `C}".
+However, simply solving for both variables results in a type of
+"\texttt{$\top$ -> $\top$}" since neither of them has upper-bound constraints.
+To obtain the expected type, we need to consider that the argument type is
+present in the context when solving for the result type. Originally, this was
+achieved by physically equating the types on both sides of the arrow in the
+context. However, this method does not work in our case since the type should
+be solved with consideration of the context.
+
+Therefore, two different functions were created to solve constraints: one for
+type checking without context, and another for human-readable printing with
+context.
+
+% \subsection{Type representation depends on the position of the variable}
+
+\subsection{Non-local unification failure}
+
+When a new constraint is added, it can affect all the types that are reachable
+in the constraint graph, even if they are not directly related. Therefore, in
+order to track typing issues, we need to check the solvability of the entire
+constraint system after adding any new constraint. However, the current
+implementation simply iterates over all the types, which can negatively
+impact performance. A less complex algorithm to address this issue could be
+implemented in the future.
+
+\section{Conclusions}
+
+This work has presented a simplified version of the S-system\cite{Castagna_2016},
+that is still extends the current system for polymorphic variants in OCaml.
+Despite being less expressive than the S-system, our proposed system resolves
+several issues of the current system. Furthermore, it simplifies the type
+reconstruction algorithm, avoids overly precise types, and requires less
+implementation effort in the OCaml compiler.
+
+We have also provided an implementation of the proposed system, which serves
+as a proof of concept for introducing subtyping to the OCaml type system.
+While the current implementation is a working prototype, it still has some
+performance and architectural issues that need to be addressed before
+presenting it to the OCaml community. Nonetheless, we believe that our work
+provides a promising starting point for further research in this area, and
+we hope that it will inspire other researchers to explore similar ideas.
+
+\newpage
+
+\printbibliography
+
+\newpage
+\thispagestyle{empty}
+
+\begin{center}
+  \Large \textbf{Statutory Declaration}
+  \vspace*{8mm}
+\end{center}
+
+\begin{center}
+  \begin{tabular}{|l|p{85mm}|}
+    \hline
+    Family Name, Given/First Name & \mylastname, \myfirstname \\
+    Matriculation number          & \mynumber                 \\
+    Kind of thesis submitted      & Bachelor Thesis           \\
+    \hline
+  \end{tabular}
+  \vspace*{8mm}
+\end{center}
+
+\subsection*{English: Declaration of Authorship}
+
+I hereby declare that the thesis submitted was created and written
+solely by myself without any external support. Any sources, direct
+or indirect, are marked as such. I am aware of the fact that the
+contents of the thesis in digital form may be revised with regard to
+usage of unauthorized aid as well as whether the whole or parts of
+it may be identified as plagiarism. I do agree my work to be entered
+into a database for it to be compared with existing sources, where
+it will remain in order to enable further comparisons with future
+theses. This does not grant any rights of reproduction and usage,
+however.
+
+This document was neither presented to any other examination board
+nor has it been published.
+
+\subsection*{German: Erklärung der Autorenschaft (Urheberschaft)}
+
+Ich erkläre hiermit, dass die vorliegende Arbeit ohne fremde Hilfe
+ausschließlich von mir erstellt und geschrieben worden ist. Jedwede
+verwendeten Quellen, direkter oder indirekter Art, sind als solche
+kenntlich gemacht worden. Mir ist die Tatsache bewusst, dass der
+Inhalt der Thesis in digitaler Form geprüft werden kann im Hinblick
+darauf, ob es sich ganz oder in Teilen um ein Plagiat handelt. Ich
+bin damit einverstanden, dass meine Arbeit in einer Datenbank
+eingegeben werden kann, um mit bereits bestehenden Quellen
+verglichen zu werden und dort auch verbleibt, um mit zukünftigen
+Arbeiten verglichen werden zu können. Dies berechtigt jedoch nicht
+zur Verwendung oder Vervielfältigung.
+
+Diese Arbeit wurde noch keiner anderen Prüfungsbehörde vorgelegt
+noch wurde sie bisher veröffentlicht.
+
+\vspace{20mm}
+
+\dotfill\\
+Date, Signature
+
+\end{document}

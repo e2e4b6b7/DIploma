@@ -1,0 +1,15 @@
+[0] Config.pm:307> INFO - This is Biber 2.19
+[0] Config.pm:310> INFO - Logfile is 'build/diploma.blg'
+[82] biber:340> INFO - === Tue Apr 18, 2023, 23:12:37
+[98] Biber.pm:419> INFO - Reading 'build/diploma.bcf'
+[188] Biber.pm:979> INFO - Found 6 citekeys in bib section 0
+[200] Biber.pm:4419> INFO - Processing section 0
+[211] Biber.pm:4610> INFO - Looking for bibtex file 'citations.bib' for section 0
+[213] bibtex.pm:1713> INFO - LaTeX decoding ...
+[223] bibtex.pm:1519> INFO - Found BibTeX data source 'citations.bib'
+[289] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[289] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[289] Biber.pm:4239> INFO - Sorting list 'nty/global//global/global' of type 'entry' with template 'nty' and locale 'en-US'
+[289] Biber.pm:4245> INFO - No sort tailoring available for locale 'en-US'
+[299] bbl.pm:660> INFO - Writing 'build/diploma.bbl' with encoding 'UTF-8'
+[303] bbl.pm:763> INFO - Output to build/diploma.bbl
