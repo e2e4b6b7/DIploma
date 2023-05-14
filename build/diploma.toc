@@ -1,22 +1,22 @@
 \babel@toc {english}{}\relax 
 \contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
-\contentsline {section}{\numberline {2}Statement and Motivation of Research}{1}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Issues with the current system}{1}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Current OCaml system formalization (K-system)}{1}{subsection.2.2}%
-\contentsline {subsection}{\numberline {2.3}Set-theoretic system formalization (S-system)}{2}{subsection.2.3}%
-\contentsline {subsubsection}{\numberline {2.3.1}Formalization}{2}{subsubsection.2.3.1}%
-\contentsline {subsubsection}{\numberline {2.3.2}Type reconstruction}{3}{subsubsection.2.3.2}%
-\contentsline {subsubsection}{\numberline {2.3.3}Issues with the system}{3}{subsubsection.2.3.3}%
-\contentsline {section}{\numberline {3}Proposed system}{3}{section.3}%
-\contentsline {subsection}{\numberline {3.1}Formalization}{3}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Properties}{4}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Types reconstruction}{4}{subsection.3.3}%
-\contentsline {section}{\numberline {4}Implementation of the proposed system}{4}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Collection of subtyping constraints}{5}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Solving types at the end of constraint collection}{5}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Variance in unification}{6}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Inequality after unification}{6}{subsection.4.4}%
-\contentsline {subsection}{\numberline {4.5}Preserving constraints when copying types}{6}{subsection.4.5}%
-\contentsline {subsection}{\numberline {4.6}Detection of the polymorphic variables in function types}{6}{subsection.4.6}%
-\contentsline {subsection}{\numberline {4.7}Non-local unification failure}{7}{subsection.4.7}%
-\contentsline {section}{\numberline {5}Conclusions}{7}{section.5}%
+\contentsline {subsection}{\numberline {1.1}Overview of the Polymorphic Variants}{1}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Overview of the Set-Theoretic Types}{1}{subsection.1.2}%
+\contentsline {section}{\numberline {2}Statement and Motivation of Research}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Hindley-Milner system}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Current system formalization (K-system)}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Set-theoretic system formalization (S-system)}{4}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Issues with the S-system}{5}{subsection.2.4}%
+\contentsline {section}{\numberline {3}Proposed system (P-system)}{6}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Formalization}{6}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Type inference}{7}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Possible improvements of the system}{7}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Implementation of the proposed system}{7}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Collection of subtyping constraints}{8}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Solving types at the end of constraint collection}{8}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Variance in unification}{9}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.4}Inequality after unification}{9}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Preserving constraints when copying types}{9}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Detection of the polymorphic variables in function types}{9}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Non-local unification failure}{10}{subsection.4.7}%
+\contentsline {section}{\numberline {5}Conclusions}{10}{section.5}%
