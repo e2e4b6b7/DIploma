@@ -143,7 +143,7 @@ If the upper bound is equal to the lower bound, the type is written as \texttt{[
 Polymorphic variants provide a balance between static safety and code reuse while maintaining a concise syntax.
 They were initially proposed as a solution to incorporate union types into Hindley-Milner (HM) type systems \cite{Garrigue_1998}.
 However, their capability is limited, due to the superimposition of a system of kinding constraints on the HM type system, which is used to simulate subtyping without actually introducing it.
-The current system reuses the ML type system, including unification for type reconstruction, as much as possible.
+The current system reuses the ML type system, including unification for type inference, as much as possible.
 However, this approach yields significant complexity, making polymorphic variants difficult to understand, especially for beginners.
 Furthermore, it limits expressiveness and prohibits several useful applications that general union types make possible.
 
@@ -406,10 +406,46 @@ Due to the fundamental simplification of the system compared to the S-system, th
 However, the main idea of the algorithm remains the same as in the S-system, where we collect subtyping constraints and solve them.
 The difference is only in the algorithm of the constraint solving.
 
-The set of the resulting constraints is treated as graph.
+The set of the resulting constraints is treated as directed graph.
 The nodes of the graph are the variables and the edges are the constraints.
 
-\textbf{TODO?: Soundness and completeness of the type reconstruction algorithm}
+On the first phase of the algorithm we are removing the cycles in the graph by merging the nodes that are strongly connected.
+After that we independently solve the upper bound and the lower bound for the variable.
+
+During the solving there are two types of nodes:
+
+First type is such that are in the context for the current type.
+For example, it can be the type of the argument of the function while we solving the type of the result or the type of the first element in tuple while we solving the type of the second element.
+Such nodes can be used in the solution as is, and we do not need to solve them and any transitive relation caused by them as we can use that as variable in the output and all the constraints are guaranteed to be satisfied by the constrained type in the declaration of that variable.
+
+Second type of nodes is the nodes that was not used in the context for the current type.
+For example it could be a type of the local variable in function while we are calculation type of the function.
+Such nodes are just an intermediate nodes that are used for transitive relations and will be satisfied if all of the transitive relations will be satisfied.
+
+Algorithm of solving, for example, the upper bound of the variable is the following (written in pseudocode):
+
+{\ttfamily\begin{verbatim}
+  let solve context node =
+    match node with
+    | Tags tags -> Tags tags
+    | Variable v -> begin
+        # The node is in the context or equal to any such node
+        if node `in` context
+        # We could use this variable as is
+        then Variable(node)
+        # The solution is the intersection
+        # of the solutions for the immediate supertypes
+        else Intersection(map (solve context) (immediate_supertypes node))
+      end
+\end{verbatim}}
+
+In brief, it is just an intersection of the reachable contextual variables and tags in the constraints graph. As the graph does not contain cycle we can do it in such recursive way. To solve for lower bound we just replace the intersection with the union and the \texttt{immediate\_supertypes} with the \texttt{immediate\_subtypes}.
+
+And finally when we receive the solution for each bound we can construct the resulting type as a \texttt{(lb $\cup$ 'a) $\cap$ ub} where lb is lower bound, ub is upper bound and 'a is the fresh variable.
+
+Using this algorithm we can get a solution that satisfies the system but for the real-world usage it is post-processed to remove repetition of the tags in upper and lower bounds to reduce the size of the resulting type.
+
+To check if the system is satisfiable we have to solve each variable without context. In that case each type will looks like the upper bound and the lower bound that both consists only of tags. And if the lowerbound is not a subset of the upperbound the system is not satisfiable and type error have to be raised.
 
 \subsection{Possible improvements of the system}
 
@@ -421,7 +457,7 @@ The first improvement is to add exclude the already matched tags from the type o
 # let remap v = match v with `A -> `B | v -> v;;
 \end{verbatim}}
 
-Current implementation will infer the type of the function as \texttt{(T as 'a) -> `B | 'a} instead of expected \texttt{(T as 'a) -> `B | 'a \ `A}.
+Current implementation will infer the type of the function as \texttt{(T as 'a) -> `B | 'a} instead of expected \texttt{(T as 'a) -> `B | 'a $\setminus$ `A}.
 This improvement could be done without a significant changes to the inference algorithm and just require more investigation on the possibility to introduce a floating types in the typechecker.
 
 The second possible improvemnt is the weakening of the strength relation between kinds of the polymorphic variant types.
@@ -578,13 +614,17 @@ implementation simply iterates over all the types, which can negatively
 impact performance. A less complex algorithm to address this issue could be
 implemented in the future.
 
+\section{Evaluation of the system}
+
+TODO
+
 \section{Conclusions}
 
 This work has presented a simplified version of the S-system\cite{Castagna_2016},
 that is still extends the current system for polymorphic variants in OCaml.
 Despite being less expressive than the S-system, our proposed system resolves
 several issues of the current system. Furthermore, it simplifies the type
-reconstruction algorithm, avoids overly precise types, and requires less
+inference algorithm, avoids overly precise types, and requires less
 implementation effort in the OCaml compiler.
 
 We have also provided an implementation of the proposed system, which serves

@@ -10,13 +10,14 @@
 \contentsline {section}{\numberline {3}Proposed system (P-system)}{6}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Formalization}{6}{subsection.3.1}%
 \contentsline {subsection}{\numberline {3.2}Type inference}{7}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Possible improvements of the system}{7}{subsection.3.3}%
-\contentsline {section}{\numberline {4}Implementation of the proposed system}{7}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Collection of subtyping constraints}{8}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Solving types at the end of constraint collection}{8}{subsection.4.2}%
+\contentsline {subsection}{\numberline {3.3}Possible improvements of the system}{8}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Implementation of the proposed system}{8}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Collection of subtyping constraints}{9}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Solving types at the end of constraint collection}{9}{subsection.4.2}%
 \contentsline {subsection}{\numberline {4.3}Variance in unification}{9}{subsection.4.3}%
-\contentsline {subsection}{\numberline {4.4}Inequality after unification}{9}{subsection.4.4}%
-\contentsline {subsection}{\numberline {4.5}Preserving constraints when copying types}{9}{subsection.4.5}%
-\contentsline {subsection}{\numberline {4.6}Detection of the polymorphic variables in function types}{9}{subsection.4.6}%
-\contentsline {subsection}{\numberline {4.7}Non-local unification failure}{10}{subsection.4.7}%
-\contentsline {section}{\numberline {5}Conclusions}{10}{section.5}%
+\contentsline {subsection}{\numberline {4.4}Inequality after unification}{10}{subsection.4.4}%
+\contentsline {subsection}{\numberline {4.5}Preserving constraints when copying types}{10}{subsection.4.5}%
+\contentsline {subsection}{\numberline {4.6}Detection of the polymorphic variables in function types}{10}{subsection.4.6}%
+\contentsline {subsection}{\numberline {4.7}Non-local unification failure}{11}{subsection.4.7}%
+\contentsline {section}{\numberline {5}Evaluation of the system}{11}{section.5}%
+\contentsline {section}{\numberline {6}Conclusions}{11}{section.6}%

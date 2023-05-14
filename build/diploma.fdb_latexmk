@@ -1,13 +1,13 @@
 # Fdb version 3
-["biber build/diploma"] 1684079074 "build/diploma.bcf" "build/diploma.bbl" "build/diploma" 1684080979
-  "build/diploma.bcf" 1684080979 107970 91b53f28ec262217a312e5fb7c1af8ed "pdflatex"
+["biber build/diploma"] 1684085515 "build/diploma.bcf" "build/diploma.bbl" "build/diploma" 1684086824
+  "build/diploma.bcf" 1684086824 107970 91b53f28ec262217a312e5fb7c1af8ed "pdflatex"
   "citations.bib" 1683718361 3576 0d66f1c18712c5404dca983fbc38aa22 ""
   (generated)
   "build/diploma.bbl"
   "build/diploma.blg"
-["pdflatex"] 1684080978 "/home/romanv/DIploma/diploma.tex" "build/diploma.pdf" "diploma" 1684080979
+["pdflatex"] 1684086823 "/home/romanv/DIploma/diploma.tex" "build/diploma.pdf" "diploma" 1684086824
   "/etc/texmf/web2c/texmf.cnf" 1683718758 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/romanv/DIploma/diploma.tex" 1684080977 35222 68ca297f532e2913da48cc511b8c32ef ""
+  "/home/romanv/DIploma/diploma.tex" 1684086822 38038 71826d058656a2e7be4d0df9625e4002 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/helvetic/phvb7t.tfm" 1136768653 2240 eb56c13537f4d8a0bd3fafc25572b1bd ""
@@ -161,12 +161,12 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1683815618 4073795 a82a847ac97773bf4a607ab050efa3a1 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1683815623 1435784 57603f96f27391405d3d58eb63b68099 ""
   "bsc-logo.png" 1683718361 10466 5858c652f72e0c409ddee778b9f23da6 ""
-  "build/diploma.aux" 1684080979 5810 dc91ca9a9b9ea4cba7ae48994126eccf "pdflatex"
-  "build/diploma.bbl" 1684079075 10008 f5b706a74fb2d013c913e40a4698327b "biber build/diploma"
-  "build/diploma.out" 1684080979 4562 ddacc3634f1cfea8caad19c35f6dc5fe "pdflatex"
-  "build/diploma.run.xml" 1684080979 2325 3103aa9453dc1b6059a94c97d906572b "pdflatex"
-  "build/diploma.toc" 1684080979 2013 4761aa88cfe930f64c8c9ea8518066b7 "pdflatex"
-  "diploma.tex" 1684080977 35222 68ca297f532e2913da48cc511b8c32ef ""
+  "build/diploma.aux" 1684086824 5935 c20b93cc6c8c4aaf24c62ff92dd806d8 "pdflatex"
+  "build/diploma.bbl" 1684085516 10008 f5b706a74fb2d013c913e40a4698327b "biber build/diploma"
+  "build/diploma.out" 1684086824 4735 3bf57ad929f6e8eadc7af54139a1a9cc "pdflatex"
+  "build/diploma.run.xml" 1684086824 2325 3103aa9453dc1b6059a94c97d906572b "pdflatex"
+  "build/diploma.toc" 1684086824 2097 bcb77d696dcb99bc964b59f739c97710 "pdflatex"
+  "diploma.tex" 1684086822 38038 71826d058656a2e7be4d0df9625e4002 ""
   (generated)
   "build/diploma.aux"
   "build/diploma.bcf"
