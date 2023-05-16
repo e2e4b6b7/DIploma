@@ -19,6 +19,130 @@
 
 \refsection{0}
   \datalist[entry]{nty/global//global/global}
+    \entry{CAML_LIST_1}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=641537d3e482a342269f74447b250a42}{%
+           family={1]},
+           familyi={1\bibinitperiod},
+           given={[CAML-LIST},
+           giveni={[\bibinithyphendelim L\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {OCaml mailing list post}%
+      }
+      \strng{namehash}{641537d3e482a342269f74447b250a42}
+      \strng{fullhash}{641537d3e482a342269f74447b250a42}
+      \strng{bibnamehash}{641537d3e482a342269f74447b250a42}
+      \strng{authorbibnamehash}{641537d3e482a342269f74447b250a42}
+      \strng{authornamehash}{641537d3e482a342269f74447b250a42}
+      \strng{authorfullhash}{641537d3e482a342269f74447b250a42}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{5}
+      \field{title}{Polymorphic variant difference}
+      \field{year}{2007}
+      \verb{urlraw}
+      \verb https://goo.gl/WlPgdY
+      \endverb
+      \verb{url}
+      \verb https://goo.gl/WlPgdY
+      \endverb
+    \endentry
+    \entry{CAML_LIST_2}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=629c75a51a0260e84017fc603bba55f7}{%
+           family={2]},
+           familyi={2\bibinitperiod},
+           given={[CAML-LIST},
+           giveni={[\bibinithyphendelim L\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {OCaml mailing list post}%
+      }
+      \strng{namehash}{629c75a51a0260e84017fc603bba55f7}
+      \strng{fullhash}{629c75a51a0260e84017fc603bba55f7}
+      \strng{bibnamehash}{629c75a51a0260e84017fc603bba55f7}
+      \strng{authorbibnamehash}{629c75a51a0260e84017fc603bba55f7}
+      \strng{authornamehash}{629c75a51a0260e84017fc603bba55f7}
+      \strng{authorfullhash}{629c75a51a0260e84017fc603bba55f7}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{2}
+      \field{title}{Variant filtering}
+      \field{year}{2000}
+      \verb{urlraw}
+      \verb https://goo.gl/d7DQhU
+      \endverb
+      \verb{url}
+      \verb https://goo.gl/d7DQhU
+      \endverb
+    \endentry
+    \entry{CAML_LIST_3}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=c2defb06c610a042a02b34cb96680679}{%
+           family={3]},
+           familyi={3\bibinitperiod},
+           given={[CAML-LIST},
+           giveni={[\bibinithyphendelim L\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {OCaml mailing list post}%
+      }
+      \strng{namehash}{c2defb06c610a042a02b34cb96680679}
+      \strng{fullhash}{c2defb06c610a042a02b34cb96680679}
+      \strng{bibnamehash}{c2defb06c610a042a02b34cb96680679}
+      \strng{authorbibnamehash}{c2defb06c610a042a02b34cb96680679}
+      \strng{authornamehash}{c2defb06c610a042a02b34cb96680679}
+      \strng{authorfullhash}{c2defb06c610a042a02b34cb96680679}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{2}
+      \field{title}{Polymorphic variant typing}
+      \field{year}{2005}
+      \verb{urlraw}
+      \verb https://goo.gl/O054v1
+      \endverb
+      \verb{url}
+      \verb https://goo.gl/O054v1
+      \endverb
+    \endentry
+    \entry{CAML_LIST_4}{thesis}{}
+      \name{author}{1}{}{%
+        {{hash=c3fafc3317f8458e5cb87b56a679b95b}{%
+           family={4]},
+           familyi={4\bibinitperiod},
+           given={[CAML-LIST},
+           giveni={[\bibinithyphendelim L\bibinitperiod}}}%
+      }
+      \list{institution}{1}{%
+        {OCaml mailing list post}%
+      }
+      \strng{namehash}{c3fafc3317f8458e5cb87b56a679b95b}
+      \strng{fullhash}{c3fafc3317f8458e5cb87b56a679b95b}
+      \strng{bibnamehash}{c3fafc3317f8458e5cb87b56a679b95b}
+      \strng{authorbibnamehash}{c3fafc3317f8458e5cb87b56a679b95b}
+      \strng{authornamehash}{c3fafc3317f8458e5cb87b56a679b95b}
+      \strng{authorfullhash}{c3fafc3317f8458e5cb87b56a679b95b}
+      \field{sortinit}{4}
+      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{month}{3}
+      \field{title}{Getting rid of impossible polymorphic variant tags from inferred types}
+      \field{year}{2004}
+      \verb{urlraw}
+      \verb https://goo.gl/ELougz
+      \endverb
+      \verb{url}
+      \verb https://goo.gl/ELougz
+      \endverb
+    \endentry
     \entry{Castagna_2016}{thesis}{}
       \name{author}{3}{}{%
         {{hash=09525a633b0ac72424537eae41ec57e8}{%
@@ -124,6 +248,55 @@
       \endverb
       \keyw{semantic subtyping,type constraints,intersection types,polymorphism,xml,types}
     \endentry
+    \entry{DSF}{thesis}{}
+      \name{author}{2}{}{%
+        {{hash=ea64b1dbb47f4e3b3a073d261d516fde}{%
+           family={Galler},
+           familyi={G\bibinitperiod},
+           given={Bernard\bibnamedelima A.},
+           giveni={B\bibinitperiod\bibinitdelim A\bibinitperiod}}}%
+        {{hash=76a2279713d8d7d3a4bb05051b71bba9}{%
+           family={Fisher},
+           familyi={F\bibinitperiod},
+           given={Michael\bibnamedelima J.},
+           giveni={M\bibinitperiod\bibinitdelim J\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{398419c7a0ed05b66dcf83a118b90fa5}
+      \strng{fullhash}{398419c7a0ed05b66dcf83a118b90fa5}
+      \strng{bibnamehash}{398419c7a0ed05b66dcf83a118b90fa5}
+      \strng{authorbibnamehash}{398419c7a0ed05b66dcf83a118b90fa5}
+      \strng{authornamehash}{398419c7a0ed05b66dcf83a118b90fa5}
+      \strng{authorfullhash}{398419c7a0ed05b66dcf83a118b90fa5}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{An algorithm for assigning storage on the basis of EQUIVALENCE, DIMENSION and COMMON declarations is presented. The algorithm is based on a tree structure, and has reduced computation time by 40 percent over a previously published algorithm by identifying all equivalence classes with one scan of the EQUIVALENCE declarations. The method is applicable in any problem in which it is necessary to identify equivalence classes, given the element pairs defining the equivalence relation.}
+      \field{issn}{0001-0782}
+      \field{journaltitle}{Commun. ACM}
+      \field{month}{5}
+      \field{number}{5}
+      \field{title}{An Improved Equivalence Algorithm}
+      \field{volume}{7}
+      \field{year}{1964}
+      \field{pages}{301\bibrangedash 303}
+      \range{pages}{3}
+      \verb{doi}
+      \verb 10.1145/364099.364331
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/364099.364331
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/364099.364331
+      \endverb
+    \endentry
     \entry{Garrigue_1998}{thesis}{}
       \name{author}{1}{}{%
         {{hash=afd798828c50cc237b473922c42b9658}{%
@@ -152,6 +325,18 @@
       \endverb
       \verb{url}
       \verb https://caml.inria.fr/pub/papers/garrigue-polymorphic_variants-ml98.pdf
+      \endverb
+    \endentry
+    \entry{REPO}{thesis}{}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labeltitlesource}{title}
+      \field{title}{Github repository with the implementation of the P-system}
+      \verb{urlraw}
+      \verb https://github.com/e2e4b6b7/ocaml/tree/constraints
+      \endverb
+      \verb{url}
+      \verb https://github.com/e2e4b6b7/ocaml/tree/constraints
       \endverb
     \endentry
     \entry{Hindley_1969}{thesis}{}

@@ -92,14 +92,9 @@
 
 \section*{Abstract}
 
-Polymorphic variants are a useful feature of the OCaml language, but their current implementation relies on kinding constraints to simulate subtyping via unification, leading to an awkward formalization and a type system with unintuitive and/or unduly restrictive behavior.
-While there is the system based on the set-theoretic types with semantic subtyping that is more expressive than the current one (it types more programs while preserving type safety) and it was demonstrated to be more precise and intuitive in several examples, it has yet to be implemented in the OCaml compiler.
+Polymorphic variants are a useful feature of the OCaml language, but their current implementation relies on kinding constraints to simulate subtyping via unification, resulting in a complex formalization and a type system that often displays unintuitive or excessively restrictive behaviors. A more expressive system, grounded in set-theoretic types with semantic subtyping, has been shown to be both more precise and intuitive across numerous examples. However, it has not yet been implemented in the OCaml compiler.
 
-% While a set-theoretic type system with semantic subtyping has been proposed to address this issue, it has yet to be implemented in the OCaml compiler.
-
-This work presents a formalization and implementation of a simplified typing system based on set-theoretic types in the OCaml compiler.
-This implementation demonstrates the feasibility of a mixed-type inference system that combines the classic Hindley-Milner algorithm with a system incorporating semantic subtyping and constraint solving.
-The resulting system offers a more intuitive and flexible approach to polymorphic variant typing in OCaml.
+This work introduces a formalization and implementation of a simplified typing system rooted in set-theoretic types within the OCaml compiler. Our implementation serves as a proof of concept for a hybrid type inference system that marries the traditional Hindley-Milner algorithm with a system that integrates semantic subtyping and constraint solving. The system we propose presents a more intuitive and flexible approach to the typing of polymorphic variants in OCaml.
 
 \newpage
 \tableofcontents
@@ -111,69 +106,65 @@ The resulting system offers a more intuitive and flexible approach to polymorphi
 
 \subsection{Overview of the Polymorphic Variants}
 
-Polymorphic variants is the pair of tag and the associated value. "\#"
-denotes the interactive toplevel prompt of OCaml, whose input is
-ended by a double semicolon and followed by the system response.
+A polymorphic variant is a pair that consists of a tag and its associated value. In the code snippets, the interactive top-level prompt of OCaml is denoted by "\#", which is terminated by a double semicolon, followed by the system response.
 
-{\ttfamily
-\# let v = `A 12;; \\
+  {\ttfamily\begin{verbatim}
+# let v = `A 12;;
 val v : [> `A of int ] = `A 12
-}
+\end{verbatim}}
 
-This is the declaration of the polymorphic variant value that has the tag \texttt{A} and the associated value of type \texttt{int}.
-The tag or constructor name is stored at runtime (as a hash) and can be used to pattern match on it.
+This is the declaration of a polymorphic variant value with the tag \texttt{A} and the associated value of type \texttt{int}. The tag or constructor name is stored at runtime (as a hash) and can be used to pattern match on it.
 
-  {\ttfamily
-    \# match v with `A x -> x + 1 | `B x -> x - 1;; \\
-    - : int = 13
-  }
+  {\ttfamily\begin{verbatim}
+# match v with `A x -> x + 1 | `B x -> x - 1;;
+- : int = 13
+\end{verbatim}}
 
-The main difference with the normal variants is that you can use the polymorphic variant constructors without declaring it first and the type of the value is inferred from the context.
+The primary distinction between normal and polymorphic variants lies in the fact that the constructors of polymorphic variants can be used without prior declaration. Moreover, the type of the value is inferred from the context.
 
-{\ttfamily
-\# let f v = match v with `A x -> x + 1 | `B x -> int\_of\_string x;; \\
+  {\ttfamily\begin{verbatim}
+# let f v = match v with `A x -> x + 1 | `B x -> int_of_string x;;
 val f : [< `A of int | `B of string ] -> int = <fun>
-}
+\end{verbatim}}
 
-The inferred type means that function accepts the values that are either \texttt{A} with the associated value of type \texttt{int} or \texttt{B} with the associated value of type \texttt{string} and accepts neither values with any other tags nor values with another type of the associated value.
+The inferred type express that the function can accept values that are either \texttt{A} with an associated value of type \texttt{int}, or \texttt{B} with an associated value of type \texttt{string}. It does not accept values with any other tags or with a different type of associated value.
 
-In general the type of the polymorphic variant could be defined as \texttt{[< UB > LB]}, where \texttt{UB} is the optional upper bound, the list of tags with the types of the assosiated value that could be written to the value of that type and \texttt{LB} is the optional lower bound, the list of tags with the types of the assosiated value that could be read from the value of that type. The assosiated value in the upper bound and the lower bound required to be equal.
-If the upper bound is equal to the lower bound, the type is written as \texttt{[UB]}.
+Another construct that can be utilized with polymorphic variants is the constrained variable in the function type.
 
-Polymorphic variants provide a balance between static safety and code reuse while maintaining a concise syntax.
-They were initially proposed as a solution to incorporate union types into Hindley-Milner (HM) type systems \cite{Garrigue_1998}.
-However, their capability is limited, due to the superimposition of a system of kinding constraints on the HM type system, which is used to simulate subtyping without actually introducing it.
-The current system reuses the ML type system, including unification for type inference, as much as possible.
-However, this approach yields significant complexity, making polymorphic variants difficult to understand, especially for beginners.
-Furthermore, it limits expressiveness and prohibits several useful applications that general union types make possible.
+{\ttfamily\begin{verbatim}
+# let f v = match v with `A x -> `A (x + 1) | v -> v;;
+val f : ([> `A of int ] as 'a) -> 'a = <fun>
+\end{verbatim}}
+
+The variable \texttt{'a} is constrained to be a polymorphic variant with the tag \texttt{A} and an associated value of type \texttt{int}. This implies that the argument's type will be unified with the type \texttt{[> `A of int ]} before it is substituted in every other occurrence of the \texttt{'a} variable.
+
+The type of a polymorphic variant can generally be defined as \texttt{[< UB > LB]}, where \texttt{UB} represents the optional upper bound, a list of tags with the types of associated values that can be written to the value of that type. \texttt{LB} is the optional lower bound, a list of tags with the types of associated values that can be read from the value of that type. The associated value in the upper bound and the lower bound must be identical. If the upper bound equals the lower bound, the type is written as \texttt{[UB]}.
+
+Polymorphic variants represent an effort to merge static safety with code reusability, all the while preserving a succinct syntax. They were initially introduced to incorporate union types within the context of Hindley-Milner type systems \cite{Garrigue_1998}. Nevertheless, their potential is restrained by the kinding constraints of the Hindley-Milner type system, which seeks to imitate subtyping without explicitly introducing it. The existing system makes extensive use of the ML type system, particularly unification for type inference. While this method maximizes reuse, it introduces considerable complexity, making polymorphic variants challenging to understand, especially for novices. Furthermore, this approach curtails expressivity and obstructs several applications that traditional union types could facilitate.
 
 \subsection{Overview of the Set-Theoretic Types}
 
-In \cite{Castagna_2016}, a type system for the polymorphic variants based on set-theoretic types and semantic subtyping was proposed.
-The authors showed that it is strictly more expressive than the current system that means that it types more programs while preserving type safety.
-The proposed system removes some pathological cases of the current implementation, resulting in a more intuitive and predictable type system.
-% The authors demonstrate the superiority of their system over the current implementation in three examples where OCaml infers imprecise types or classifies them as type errors while set-theoretic system successfully types the program and does not require excessive constructions from the programmer like explicit type coercion.
-While the full implementation of their system is not possible due to the absence of Runtime Type Information in OCaml, the authors propose a modified system that fixes some of the issues and remains strictly more expressive than the current implementation.
+In \cite{Castagna_2016}, a type system for polymorphic variants, based on set-theoretic types and semantic subtyping, was proposed. The authors demonstrated that their proposed system is strictly more expressive than the existing system, meaning it types more programs while preserving type safety. This system also eliminates some pathological cases present in the current implementation, thereby resulting in a more intuitive and predictable type system. However, the full implementation of their system is not possible due to the absence of Runtime Type Information in OCaml. Thus, the authors proposed a modified system that ameliorates some of the issues and remains strictly more expressive than the current implementation.
 
-The type of the polymorphic variant in the set-theoretic system is the set of the tags with the types of the associated value. There is no upper bound and the lower bound. The meaning of the type depends on the context where it is used. For example, if the type is used as the argument of the function, the type is the set of the tags with the types of the associated value that could be accepted by the function and if the type is used as the result of the function, the type is the set of the tags with the types of the associated value that could be returned by the function.
+In the set-theoretic system, the type of a polymorphic variant is the set of tags along with their associated types. There are no upper or lower bounds. The interpretation of the type depends on the context in which it is used. For instance, when the type is used as a function argument, it is the set of tags with their associated types that the function can accept. Conversely, when the type is used as a function result, it is the set of tags with their associated types that the function can return.
 
-The superiority of the proposed system could be demonstrated in the following examples:
+The superiority of the proposed system can be demonstrated through the following examples:
 
-\textbf{Example 1: loss of polymorphism.} Let us consider the identity function \texttt{id} that could be applied to the limited set of tags.
+\textbf{Example 1: loss of polymorphism.} Let's examine the identity function \texttt{id} that could be applied to the limited set of tags.
 
-  {\ttfamily
-    \# let id v = match v with `A | `B -> v;; \\
-    val id : ([< `A | `B ] as 'a) -> 'a = <fun>
-  }
+  {\ttfamily\begin{verbatim}
+# let id v = match v with `A | `B -> v;;
+val id : ([< `A | `B ] as 'a) -> 'a = <fun>
+\end{verbatim}}
 
-The type of the function is looks soundness as it accepts only the values of such tags and return the value of the same type. However if we apply this function we will reuslt the value with the unexpected type.
+The function's type appears sound as it only accepts values of certain tags and returns a value of the same type. However, upon applying this function, we obtain a value with an unexpected type.
 
-{\ttfamily
-\# id `A;; \\
+  {\ttfamily\begin{verbatim}
+# id `A;;
 - : [< `A | `B > `A ] = `A
-}
+\end{verbatim}}
 
-As we can see the inferred type of the value is not the expected \texttt{[> `A']} and contains redundant upper bound. This may lead to the unexpected type error in the following example:
+As can be seen, the inferred type of the value is not the expected \texttt{[> `A']} and contains a redundant upper bound. This can lead to unexpected type errors, as demonstrated below:
 
 {\ttfamily\begin{verbatim}
 # [id `A; `C'];;
@@ -182,7 +173,7 @@ Error: This expression has type [> `C ]
        The second variant type does not allow tag(s) `C
 \end{verbatim}}
 
-Whereas the set-theoretic system is able to infer the expected type:
+In contrast, the set-theoretic system is capable of inferring the expected type:
 
 {\ttfamily\begin{verbatim}
 # let id v = match v with `A | `B -> v;;
@@ -193,23 +184,23 @@ val id : ((`A | `B) as 'a) -> 'a = <fun>
 - : (`A | `C) list = [`A; `C']
 \end{verbatim}}
 
-This example was not inferred by any program but just an expected behavior of the system.
+This example was not inferred by any program but rather, demonstrates the expected behavior of the system.
 
-\textbf{Example 2: roughly-typed pattern matching.} Let us consider the remap function that converts the value of the specified tag into another tag while do not affect the values of other tags.
+\textbf{Example 2: Roughly-Typed Pattern Matching.} Let's examine the remap function, which converts the value of a specific tag into another tag, without affecting the values of other tags.
 
   {\ttfamily\begin{verbatim}
 # let remap v = match v with `A -> `B | v -> v;;
 val remap : ([> `A | `B ] as 'a) -> 'a = <fun>
 \end{verbatim}}
 
-And if we would like to map a list with such function we will get the unexpected type of the resulting list:
+When this function is used to map a list, we obtain a resulting list of an unexpected type:
 
 {\ttfamily\begin{verbatim}
 # List.map remap [`A; `B; `C'];;
 - : [> `A | `B | `C' ] list = [`B; `B; `C']
 \end{verbatim}}
 
-While it is obvious that the resulting list can not contain the tag \texttt{`A} as it is mapped to the tag \texttt{`B}, the current system is not able to infer such property. However, the set-theoretic system is able to infer the expected type:
+While it is clear that the resulting list cannot contain the tag \texttt{A} as it is mapped to the tag \texttt{B}, the current system is incapable of inferring this property. On the other hand, the set-theoretic system can infer the expected type:
 
 {\ttfamily\begin{verbatim}
 # let remap v = match v with `A -> `B | v -> v;;
@@ -218,21 +209,23 @@ val remap : 'a -> `B | 'a \ `A = <fun>
 - : (`B | `C) list = [`B; `B; `C']
 \end{verbatim}}
 
-Despite the fact that these examples are artificial, they demonstrate the problems with the current system and the superiority of the set-theoretic system. Another and more "real life" examples of the problems with current system can be found in the TODO: add citation of the: [CAML-LIST 1] 2007; [CAML-LIST 2] 2000; [CAML-LIST 3] 2005; [CAML-LIST 4] 2004; Nicollet 2011; Wegrzanowski 2006)
+Despite these examples being somewhat artificial, they effectively highlight the issues with the current system and demonstrate the superiority of the set-theoretic system. More practical examples of problems with the current system can be found in \cite{CAML_LIST_1}\cite{CAML_LIST_2}\cite{CAML_LIST_3}\cite{CAML_LIST_4}.
 
-Although the proposed system was specifically designed for OCaml and the authors promised an implementation, it was only implemented as an external type checker for a subset of OCaml in a separate repository \cite{setvariants}.
-As the implementation of the described system requires rewriting a significant part of the OCaml type checker and introducing new basic types, it is unlikely that the implementation will be accepted by the community.
-Therefore, we propose a simplified version of the system and conduct an experiment to implement it in the existing type checker without strong interoperability with the other subsystems of the OCaml language.
+The proposed system, despite being specifically designed for OCaml with a promised implementation, has only been implemented as an external type checker for a subset of OCaml in a separate repository \cite{setvariants}. Given that the implementation of this system necessitates rewriting a substantial portion of the OCaml type checker and introducing new basic types, it is unlikely that this implementation will gain community acceptance. As a result, we propose a simplified version of the system and undertake an experiment to implement it in the existing type checker, without requiring strong interoperability with other subsystems of the OCaml language.
+
+% \textit{\textbf{Outline.}} Section 2 provides a brief overview of the K-system (current system) and the S-system (set-theoretic system) and highlights the issues with them.
+
+% Section 3 presents the proposed system (P-system) and its initial formalization with the description of the type inference algorithm and possible improvements.
 
 \section{Statement and Motivation of Research}
 
 \subsection{Hindley-Milner system}
 
-Current implementation of the OCaml typechecker highly relies on the Hindley-Milner system \cite{Hindley_1969} \cite{Milner_1978}.
-The main function in this system is unification that is find a substitution that makes types equal.
-It calls on the types of the values that are expected to be compatible, for example, the argument and the left side of the arrow type of the applied function.
+The current implementation of the OCaml typechecker is deeply rooted in the application of the Hindley-Milner system \cite{Hindley_1969} \cite{Milner_1978}. This system is of significant importance in the domain of functional programming languages, with OCaml being a notable instance of such languages.
 
-We can see the example of the unification in the following code:
+The principal function of the Hindley-Milner system is unification. This process aims at finding an appropriate substitution that equates two different types. Unification operates in contexts where certain values' types are anticipated to be compatible. A typical example of such a context is an application of a function, where the argument and the left side of the arrow type of the function need to be compatible.
+
+To illustrate the process of unification, consider the following code snippet:
 
 {\ttfamily\begin{verbatim}
 # let f v = fun _ -> v;;
@@ -241,22 +234,16 @@ val f : 'a -> 'b -> 'a = <fun>
 val g : '_weak1 -> int = <fun>
 \end{verbatim}}
 
-When we applied the function \texttt{f} to the value \texttt{1} the type of the argument \texttt{'a} was unified with the type of the value \texttt{int} and the resulting substitution was \texttt{'a -> int}. Then the substitution was applied to the type of the function \texttt{f} and the resulting type was \texttt{'\_weak1 -> int}. The type variable \texttt{'\_weak1} is called weak as it is not constrained by the context and could be unified with any type.
+In this example, the function \texttt{f} is applied to the value \texttt{1}. During this application, the unification process is activated. The type of the argument \texttt{'a} is compared with the type of the value \texttt{int}, leading to a substitution \texttt{'a -> int} that makes the types equivalent. This identified substitution is then applied to the type of the function \texttt{f}, resulting in a new type \texttt{'\_weak1 -> int} for the function. The type variable \texttt{'\_weak1} is termed as 'weak' as it is not constrained by its context. This allows it to potentially unify with any other type.
 
 \subsection{Current system formalization (K-system)}
 
-The formalization of the OCaml system utilized in this work was
-derived from the paper describing the set-theoretic system \cite{Castagna_2016}.
-A countable set of type variables, denoted by $\alpha$, is assumed to exist.
-Additionally, a finite set of basic types, represented by $b$, is considered,
-with a function $b(\cdot)$ that maps constants to basic types.
+In this work, the formalization of the OCaml system is primarily derived from a seminal paper that presents a detailed description of the set-theoretic system \cite{Castagna_2016}. A countable set of type variables, denoted by $\alpha$, is assumed to exist. Additionally, a finite set of basic types, represented by $b$, is considered, with a function $b(\cdot)$ that maps constants to basic types.
 
 \begin{defsec}[Types]
   A type $\tau^k$ is a term inductively generated by the following grammar.
   $$ \tau^k ::= \alpha\ |\ b\ |\ \tau^k \rightarrow \tau^k\ |\ \tau^k \times \tau^k $$
 \end{defsec}
-
-TODO: definition of the intersection and exclusion
 
 The system only uses the types of core ML: any supplementary information
 is represented through the kinds of type variables.
@@ -276,14 +263,13 @@ is represented through the kinds of type variables.
   both $tag : t^k_1 \in T$ and $tag : t^k_2 \in T$, we have $t^k_1 = t^k_2$\\
 \end{defsec}
 
-TODO: admissibility of the substitution
+The correctness of type transformations is governed by the admissibility of the type substitution. A type substitution is considered admissible if the kind of the substituted variable is stronger than that of the original one. The relation of strength is defined as follows:
 
-Inference for the K-system is done using a standard algorithm for Hindley-Milner systems.
-While ther is no explicit variables in the type for the strightforward substitution, the unifcation just makes the types equal transforming kinds of the variables.
-The lowerbound of the unified variable is the intersection of the lowerbounds of the unified variables and the upperbound of the unified variable is the union of the upperbounds of the unified variables.
-The mapping from the to the type of the assosiated value is the merge of the mappings where the tags that was presented in the both mapping are recursively unified.
+$$ (L, U, T ) \vDash (L', U ', T ') \Leftrightarrow L \supseteq L \cap U \subseteq U' \cap T \supseteq T'  $$
 
-Such behavior explain the loss of polymorphism issue:
+Inference within the K-system operates using the standard algorithm for Hindley-Milner systems. Although there are no explicit variables in the type for direct substitution, unification equalizes the types by transforming the kinds of the variables. The lower bound of the unified variable is the intersection of the lower bounds of the variables being unified, while the upper bound of the unified variable is the union of the upper bounds of the variables being unified. The mapping from tag to the type of the associated value is the union of the mappings, with tags present in both mappings being recursively unified.
+
+This system behavior provides an explanation for the issue of polymorphism loss. The following code snippet offers an illustration:
 
 {\ttfamily\begin{verbatim}
 # let id v = match v with `A | `B -> v;;
@@ -292,89 +278,54 @@ val id : ([< `A | `B ] as 'a) -> 'a = <fun>
 - : [< `A | `B > `A ] = `A
 \end{verbatim}}
 
-When we unified the left side of the arrow type \texttt{([< `A | `B ] as 'a)} with the type of the argument \texttt{`A} the resulting type was \texttt{[< `A | `B > `A]} and it was subsituted to the type of the application.
+In this instance, unification occurred between the left side of the arrow type \texttt{([< A | B ] as 'a)} and the type of the argument \texttt{A}. The outcome of this unification was the type \texttt{[< A | B > A]}, which was then substituted into the type of the application.
 
 \subsection{Set-theoretic system formalization (S-system)}
 
-In that system, subtyping is added using a semantic definition
-based on set-theoretic types, rather than encoding it via
-instantiation. They utilize type connectives and subtyping to
-represent variant types as unions and to encode bounded quantification
-by union and intersection.
+In the S-system formalization, subtyping is introduced via a semantic definition based on set-theoretic types, as opposed to its encoding through instantiation. The system utilizes type connectives and subtyping to represent variant types as unions and to encode bounded quantification through the use of union and intersection operations.
 
-As before, we consider a set $V$ of type variables (ranged over by $\alpha$)
-and the sets $C$, $L$, and $B$ of language constants, tags, and
-basic types (ranged over by $c$, $tag$, and $b$ respectively).
+As for previous definition, we assume a set $V$ of type variables (denoted by $\alpha$), alongside the sets $C$, $L$, and $B$ which represent language constants, tags, and basic types (represented by $c$, $tag$, and $b$ respectively).
 
 \begin{defsec}[Types]
   A type $\tau^s$ is a term inductively generated by the following grammar.
   $$ \tau^s ::= \alpha\ |\ b\ |\ c\ |\ \tau^s \rightarrow \tau^s\ |\ \tau^s \times \tau^s\ |\ tag(\tau^s)\ |\ \tau^s \cup \tau^s\ |\ \neg\tau^s\ |\ 0 $$
 \end{defsec}
 
-\textbf{Variant types and bounded quantification.}
-The S-system encodes bounds and tag-to-content type mappings using standard
-type constructions. For example, to simulate a variable $\alpha$ of kind
-(\{A\}, \{A,B\}, \{A : bool, B : int\}) in the S-system, we can use the common
-scheme $(t^s_l \cup \beta) \cap t^s_u$ where $t^s_l$ is the lower bound
-and $t^s_u$ is the upper bound, resulting in
-$(A(bool) \cup \beta) \cap (A(bool) \cup B(int))$.
+The following abbreviations will be used:
 
-\textbf{Subtyping.}
-Subtyping is semantically defined as $t^s_1 \leq t^s_2$ if and only if
-$\llbracket t^s_1\rrbracket \subseteq \llbracket t^s_2\rrbracket$, where
-$\llbracket\cdot\rrbracket$ is an interpretation function mapping types
-to sets of elements from a domain
-(intuitively, the set of values of the language).
+$$ \tau_1^s \cap \tau_2^s := \neg(\neg\tau_1^s \cup \neg\tau_2^s);\ \ \tau_1^s \setminus \tau_2^s := \tau_1^s \cap (\neg\tau_2^s);\ \ 1 := \neg 0 $$
 
-The authors of the paper have demonstrated that their system extends the K-system through a translation of types from K to S and have established that this translation preserves the typing relation.
+\textbf{Variant types and bounded quantification.} The S-system encodes bounds and tag-to-content type mappings using standard type constructions. For instance, to simulate a variable $\alpha$ of kind (\{A\}, \{A,B\}, \{A : bool, B : int\}) in the S-system, the common scheme $(t^s_l \cup \beta) \cap t^s_u$ can be used, where $t^s_l$ is the lower bound and $t^s_u$ is the upper bound. This results in the expression $(A(bool) \cup \beta) \cap (A(bool) \cup B(int))$.
 
-Type inference in S-system proceeds in two main phases.
-In the first, constraint generation, they generate constraints from an expression $e$ and a type $t$ a set of constraints that record the conditions under which $e$ may be given type $t$.
-In the second phase, constraint solving, they solve (if possible) these constraints to obtain a type substitution $\theta$.
-Solution of the constraint set was done using the "tallying" algorithm \cite{Castagna_2015}.
-In the \cite{Castagna_2016} were proved that the type inference in S-system is sound and complete.
+\textbf{Subtyping.} Subtyping is semantically defined as $t^s_1 \leq t^s_2$ if and only if $\llbracket t^s_1\rrbracket \subseteq \llbracket t^s_2\rrbracket$, where $\llbracket\cdot\rrbracket$ represents an interpretation function mapping types to sets of elements from a domain (intuitively, the set of values of the language).
+
+The authors of the foundational paper for the S-system demonstrated that their system extends the K-system through a type translation from K to S, and they established that this translation preserves the typing relation.
+
+Type inference within the S-system occurs in two main phases. The first phase, constraint generation, involves generating constraints from an expression $e$ and a type $t$, which records the conditions under which $e$ may be assigned type $t$. In the second phase, constraint solving, these constraints are solved (if possible) to obtain a type substitution $\theta$. Solution of the constraint set is achieved using the "tallying" algorithm \cite{Castagna_2015}. The authors of \cite{Castagna_2016} proved that the type inference in the S-system is both sound and complete.
 
 \subsection{Issues with the S-system}
 
-While the S-system is more expressive than the K-system, it is also more complex. And it leads to several issues:
+While the S-system is indeed more expressive in comparison to the K-system, it is also correspondingly more complex, which consequently gives rise to several issues:
 
-The S-system introduces full-flegged set-teoretic types not only for the polymorphic variants but for all the types.
-As a result it may be too expressive for common types like \texttt{string} or \texttt{int}.
-Types like "\texttt{string $\setminus$ "A"}" expressing that that value can contain any string value excluding the string \texttt{"A"} may be intimidating
-for programmers.
+Firstly, the S-system introduces comprehensive set-theoretic types, not solely for polymorphic variants but for all types. As a consequence, it may be excessively expressive for commonly used types such as \texttt{string} or \texttt{int}. One can envision types like "\texttt{string $\setminus$ "A"}" which express the possibility that a value can contain any string value, with the exception of the string \texttt{"A"}. For many programmers, the prospect of dealing with such types can be daunting.
 
-The type inference algorithm for the S-system is non-deterministic.
-It means that the same program may be typed differently depending on the order of the constraints.
-While it is not a problem for the type safety, it may be a problem for the programmer as the type of the program may be different from the expected one.
-In addition it makes the implementation of the whole typechecker more complex.
+Secondly, the type inference algorithm for the S-system exhibits non-deterministic behavior. This implies that the same program can be typed differently depending on the order in which constraints are processed. Although this does not pose an issue for type safety, it can create problems for programmers because the type of the program may diverge from the anticipated one. This variability also compounds the complexity of implementing a comprehensive typechecker.
 
-The "tallying" algorithm has certain section where it must iterate through all potential solutions at each depth, which can result in exponential complexity.
-There is no clarity about how often this happens in practice, how much it affects performance, and is there any way to optimize it.
-As the performance is rather important for compier, it is a potential issue that requires additional investigation.
+Thirdly, the "tallying" algorithm employed in the S-system has a certain section where it is obliged to iterate through all potential solutions at each level of depth, which may result in an exponential increase in complexity. There is currently no clear understanding about the frequency at which this occurs in practice, how significantly it impacts performance, or whether there exist any potential avenues for optimization. Given that performance is a key consideration for a compiler, this represents a potential issue warranting further investigation.
 
-In addition, the current implementation of the "tallying" algorithm has bugs and may enter an infinite constraint-solving loop.
-This is not acceptable for the typechecker of the industrial programming language.
-Therefore, there is the additional work required to fix the algorithm.
+Finally, the current implementation of the "tallying" algorithm is not without its flaws and has been observed to enter an infinite constraint-solving loop. This behavior is not acceptable for the typechecker of an industrial-grade programming language. Therefore, additional work is necessitated to rectify the algorithm.
 
 \section{Proposed system (P-system)}
 
 \subsection{Formalization}
 
-The implementation of the S-system requires rewriting a significant part of the typechecker, which could not be done within the scope of this work and is unlikely to be accepted by the OCaml community.
-Due to this and the listed issues with the S-system, we propose a simplified version of the system that is more intuitive and easier to implement.
-The main idea of the simplification was to limit the use of set-theoretic operations only to the polymorphic variants subsystem.
+The implementation of the S-system entails a significant rewrite of the typechecker, which is beyond the scope of this work and is not likely to gain acceptance from the OCaml community. Given this and the aforementioned issues with the S-system, we suggest a simplified version of the system that is more straightforward and easier to implement. The primary aim of this simplification is to restrict the usage of set-theoretic operations to the polymorphic variants subsystem only.
 
-To achieve this, we syntactically divide the types into two groups: the types of the polymorphic variants subsystem and the other types.
-We preserve kinds but limit their function only to the mapping from the tag to the type of the associated value.
-The types of the polymorphic variants subsystem are the pair of static mapping from tag to type and the type of the polymorphic variant that contains only tags and their set-theoretic relations.
-We infer type of the polymorphic variant using the same technique as in the S-system, but we do not collect subtyping constraints for other types.
+To realize this, we categorize the types syntactically into two groups: those belonging to the polymorphic variants subsystem and all other types. We maintain kinds but restrict their role to the mapping from the tag to the associated value's type. The types of the polymorphic variants subsystem constitute a pair comprising a static mapping from tag to type, and the type of the polymorphic variant, which includes only tags and their set-theoretic relations. We infer the type of the polymorphic variant using the same methodology as in the S-system, but we avoid gathering subtyping constraints for other types.
 
-For the purpose of demonstrating the system, we will reuse the simple
-language of polymorphic variants introduced in Section 2 of \cite{Castagna_2016}.
+For the purpose of showcasing the system, we will reuse the simplistic language of polymorphic variants, as introduced in Section 2 of \cite{Castagna_2016}.
 
-As before, we consider a set $V$ of type variables (ranged over by $\alpha$)
-and the sets $L$ and $B$ of tags and basic types (ranged over by $tag$, and
-$b$ respectively).
+As for our previous definitions, we consider a set $V$ of type variables (ranged over by $\alpha$), and the sets $L$ and $B$ of tags and basic types (ranged over by $tag$ and $b$ respectively).
 
 \begin{defsec}[Types]
   A type $\tau^p$ is a term inductively generated by the following grammar.
@@ -388,41 +339,48 @@ $b$ respectively).
   - $\kappa^p$ is the kind of the polymorphic variant type;
 \end{defsec}
 
-TODO: definition of the intersection and exclusion
+The following abbreviations will be used for polymorphic variant types:
+
+$$ \tau_1^s \cap \tau_2^s := \neg(\neg\tau_1^s \cup \neg\tau_2^s);\ \ \tau_1^s \setminus \tau_2^s := \tau_1^s \cap (\neg\tau_2^s);\ \ 1 := \neg 0 $$
 
 \begin{defsec}[Kinds]
-  A kind $\kappa^p$ is a map from tags to general types ($\tau^p$)
+  A kind, denoted as $\kappa^p$, is defined as a mapping from tags to general types ($\tau^p$).
 \end{defsec}
 
-To control the correctness of the substitution we define strength relation between kinds of the polymorphic variant types as in the K-system:
+To manage the correctness of the substitution, we establish a strength relation between the kinds of the polymorphic variant types, similar to what is done in the K-system:
 $$ \kappa_1^p \vDash \kappa_2^p \Leftrightarrow (\forall tag, t_p: (tag,t_p) \in \kappa_2^p \implies (tag,t_p) \in \kappa_1^p)$$
-where $\kappa_1^p \vDash \kappa_2^p$ means that $\kappa_1^p$ is stronger than $\kappa_2^p$. On the other words it is just a submapping relaion.
+Here, $\kappa_1^p \vDash \kappa_2^p$ implies that $\kappa_1^p$ is stronger than $\kappa_2^p$. In other words, it represents a submapping relation.
 
-The type substitution becames the triplet: for variables of general types, for variables of polymorphic variant types and for kinds of polymorphic variant types. And for kinds we require that the subsituted kind is stronger than the original one.
+The type substitution has become a triplet: for variables of general types, for variables of polymorphic variant types, and for kinds of polymorphic variant types. And for kinds, we necessitate that the substituted kind is stronger than the original one.
+
+The P-system showcases more expressiveness than the K-system, as any type from the K-system can be converted into a type in the P-system using the same methodology as the K-system to S-system transformation. However, the P-system is less expressive than the S-system because it doesn't allow union and negation on types other than polymorphic variants, and it imposes stringent restrictions on kind relations.
+
+The first limitation prevents us from using types like \texttt{True} or \texttt{int \\ 1}, which can assist in the typing of certain programs but are not generally useful.
+
+The second limitation is more significant. It prevents us from typing the following function:
+
+{\ttfamily\begin{verbatim}
+# let remap v = match v with `A 10 -> `A "A" | v -> v;;
+\end{verbatim}}
+
+This occurs because the kinds of the polymorphic variant type that are syntactically compatible are restricted to having the same type for each common tag. Consequently, the initially inferred type \texttt{int} conflicts with the type \texttt{string} in the match expression. This case is covered in the S-system. But since it's not covered in the K-system either, such a restriction is not a significant drawback.
 
 \subsection{Type inference}
 
 Due to the fundamental simplification of the system compared to the S-system, the type inference algorithm could also be simplified.
-However, the main idea of the algorithm remains the same as in the S-system, where we collect subtyping constraints and solve them.
-The difference is only in the algorithm of the constraint solving.
+However, the principal idea of the algorithm remains unchanged from the S-system, wherein we gather subtyping constraints and subsequently resolve them. The distinction arises solely in the constraint-solving algorithm.
 
-The set of the resulting constraints is treated as directed graph.
-The nodes of the graph are the variables and the edges are the constraints.
+The resultant set of constraints is treated as a directed graph, with the nodes of the graph being the variables and the edges being the constraints.
 
-On the first phase of the algorithm we are removing the cycles in the graph by merging the nodes that are strongly connected.
-After that we independently solve the upper bound and the lower bound for the variable.
+In the first phase of the algorithm, we remove cycles in the graph by merging nodes that are strongly connected. Following this, we independently solve the upper bound and the lower bound for the variable.
 
-During the solving there are two types of nodes:
+During the solution process, we encounter two types of nodes:
 
-First type is such that are in the context for the current type.
-For example, it can be the type of the argument of the function while we solving the type of the result or the type of the first element in tuple while we solving the type of the second element.
-Such nodes can be used in the solution as is, and we do not need to solve them and any transitive relation caused by them as we can use that as variable in the output and all the constraints are guaranteed to be satisfied by the constrained type in the declaration of that variable.
+The first type includes nodes that are in the context for the current type. For instance, this could be the type of the argument of a function while we're resolving the type of the result, or the type of the first element in a tuple while we're resolving the type of the second element. Such nodes can be used in the solution as they are, and we do not need to resolve them and any transitive relation caused by them. This is because we can utilize that as a variable in the output and all the constraints are assured to be satisfied by the constrained type in the declaration of that variable.
 
-Second type of nodes is the nodes that was not used in the context for the current type.
-For example it could be a type of the local variable in function while we are calculation type of the function.
-Such nodes are just an intermediate nodes that are used for transitive relations and will be satisfied if all of the transitive relations will be satisfied.
+The second type of nodes are those that were not used in the context for the current type. An example of this might be a type of a local variable in a function while we are calculating the function's type. These nodes serve as intermediate nodes that are used for transitive relations and will be satisfied if all the transitive relations are met.
 
-Algorithm of solving, for example, the upper bound of the variable is the following (written in pseudocode):
+The algorithm for solving the upper bound of a variable, for instance, is illustrated in the following pseudocode:
 
 {\ttfamily\begin{verbatim}
   let solve context node =
@@ -439,201 +397,143 @@ Algorithm of solving, for example, the upper bound of the variable is the follow
       end
 \end{verbatim}}
 
-In brief, it is just an intersection of the reachable contextual variables and tags in the constraints graph. As the graph does not contain cycle we can do it in such recursive way. To solve for lower bound we just replace the intersection with the union and the \texttt{immediate\_supertypes} with the \texttt{immediate\_subtypes}.
+In short, it is merely an intersection of the reachable contextual variables and tags in the constraints graph. As the graph does not contain a cycle, we can do this in a recursive manner. To solve for the lower bound, we simply replace the intersection with the union, and the \texttt{immediate\_supertypes} with the \texttt{immediate\_subtypes}.
 
-And finally when we receive the solution for each bound we can construct the resulting type as a \texttt{(lb $\cup$ 'a) $\cap$ ub} where lb is lower bound, ub is upper bound and 'a is the fresh variable.
+Once we receive the solution for each bound, we can construct the resulting type as a \texttt{(lb $\cup$ 'a) $\cap$ ub} where 'lb' is the lower bound, 'ub' is the upper bound, and 'a' is the fresh variable.
 
-Using this algorithm we can get a solution that satisfies the system but for the real-world usage it is post-processed to remove repetition of the tags in upper and lower bounds to reduce the size of the resulting type.
+Using this algorithm, we can obtain a solution that satisfies the system. However, for real-world usage, it is post-processed to remove repetition of the tags in the upper and lower bounds, thereby reducing the size of the resulting type.
 
-To check if the system is satisfiable we have to solve each variable without context. In that case each type will looks like the upper bound and the lower bound that both consists only of tags. And if the lowerbound is not a subset of the upperbound the system is not satisfiable and type error have to be raised.
+To check if the system is satisfiable, we must solve each variable without context. In this case, each type will appear as the upper bound and the lower bound, both consisting only of tags. If the lower bound is not a subset of the upper bound, the system is not satisfiable and a type error must be raised.
 
 \subsection{Possible improvements of the system}
 
-The proposed system is not the formalization of the implemented system but not the most expressive system satisfying the listed requirements. There are several possible improvements of the system that could be done in the future.
+The system proposed herein is a formalization of the implemented system, but it is not the most expressive system that fulfills the requirements listed. In the future, several potential enhancements to the system could be undertaken.
 
-The first improvement is to add exclude the already matched tags from the type of the polymorphic variant value in the else branch of matching. Currently system do not fix the issue with roughly typed pattern matching. For example for followoing code:
+The first improvement involves excluding the already matched tags from the type of the polymorphic variant value in the 'else' branch of matching. The current system does not rectify the issue with roughly typed pattern matching. For instance, for the following code:
 
 {\ttfamily\begin{verbatim}
 # let remap v = match v with `A -> `B | v -> v;;
 \end{verbatim}}
 
-Current implementation will infer the type of the function as \texttt{(T as 'a) -> `B | 'a} instead of expected \texttt{(T as 'a) -> `B | 'a $\setminus$ `A}.
-This improvement could be done without a significant changes to the inference algorithm and just require more investigation on the possibility to introduce a floating types in the typechecker.
+The current implementation will infer the type of the function as \texttt{(T as 'a) -> B | 'a} instead of the expected \texttt{(T as 'a) -> B | 'a $\setminus$ `A}. This enhancement could be realized without significant changes to the inference algorithm and merely requires further investigation into the possibility of introducing floating types in the typechecker.
 
-The second possible improvemnt is the weakening of the strength relation between kinds of the polymorphic variant types.
-Instead of current requirements we could allow for the mapped type of the stronger kind to be a supertype of the mapped type of the weaker one.
-It will not affect the inference at all and just add more expressiveness in case of the nested polymorphic variant types.
-It will be equal to the introduction of the subtyping for the general types where the non polymorphic variant types will be in such relation only in case they are equal while for the polymorphic variant types the relation will be more flexible.
+The second potential enhancement is the relaxation of the strength relation between kinds of the polymorphic variant types. As opposed to the current requirements, we could allow for the mapped type of the stronger kind to be a supertype of the mapped type of the weaker one. This would not impact the inference in any way, but merely add more expressiveness in cases of nested polymorphic variant types and permit changes to the associated type of some tags. This would be akin to the introduction of subtyping for the general types, where the non-polymorphic variant types would be in such relation only if they are equal, while for the polymorphic variant types, the relation would be more flexible.
+
+For instance, for the following function:
+
+{\ttfamily\begin{verbatim}
+# let remap v = match v with `A _ -> `A "A" | v -> v;;
+\end{verbatim}}
+
+The argument could have a kind without any restriction on the associated type for \texttt{`A}, while the current formalization requires it to be \texttt{string}, as is the case for the result type.
 
 \section{Implementation of the proposed system}
 
-The main issue with modifying the OCaml type checker is described in the
-\texttt{TODO.md} file in the respective directory:
+\subsection{Current state of the typechecker}
+
+The primary challenge with modifying the OCaml typechecker is articulated in the \texttt{TODO.md} file located in the respective directory:
 {\itshape
-"There is a consensus that the current implementation of the OCaml typechecker
-is overly complex and fragile. A big rewriting "from scratch" might be possible
-or desirable at some point, or not, but incremental cleanup steps are certainly
-accessible and could bring the current implementation in a better shape at a
-relatively small cost and in a reasonably distant future."
+"There is a consensus that the current implementation of the OCaml typechecker is overly complex and fragile. A big rewriting "from scratch" might be possible or desirable at some point, or not, but incremental cleanup steps are certainly accessible and could bring the current implementation in a better shape at a relatively small cost and in a reasonably distant future."
 }
-However, since this document was created in 2018 and has
-only been slightly modified until 2020, there is no chance for improvements
-to the type checker codebase in the near future. As a result, we had to work
-with what we had.
+However, given that this document was created in 2018 and has seen only minor modifications up to 2020, improvements to the type checker codebase in the near future seem unlikely. Consequently, we had to work with what was available.
 
-The OCaml type checker is based on the Hindley-Milner system \cite{Hindley_1969}
-\cite{Milner_1978}, and inference in this system relies on the "\texttt{unify}"
-function, which is used to find a substitution that makes two types equal.
-Unification between types is syntax directed, for example,
-between the argument and the left side of the arrow type of the applied
-function. After unification, all the equality constraints are reflected in
-the type, and no further solution is required.
+The OCaml type system has been using the Hindley-Milner \cite{Hindley_1969} \cite{Milner_1978} system since its inception 27 years ago, leading the type checker to heavily rely on invariants that are specific to the Hindley-Milner system.
+This leads to a high cost of changes that do not preserve such invariants.
+The specific invariants that were broken will be described in detail in section 4.2.
 
-The OCaml type system has been using the Hindley-Milner system since its
-inception 27 years ago, and as a result, the type checker heavily relies
-on the invariants that are specific to the HM system. This leads to a high
-cost of changes that do not preserve such invariants.
+The inference in the Hindley-Milner system relies on the "\texttt{unify}" function, which is utilized to find a substitution that makes two types equal.The unification between types is syntax-directed, such as between the argument and the left side of the arrow type of the applied function. Following unification, all equality constraints are reflected in the type, negating the need for further solution.
 
-\subsection{Collection of subtyping constraints}
+Another crucial component of the typechecker is the substitution. In OCaml, this is achieved not by traversing the type but by leveraging the physical equality of the types. Post unification, they make the unified type reference the same type description. This approach serves as a valid optimization because types that have become equal are expected to remain so indefinitely. In addition to memory optimization, this results in all variables that were unified becoming physically equal, even if they were nested deep within the type, such as the first element of a tuple. Consequently, any subsequent changes in any of them will affect all of them, as is expected in the substitution.
 
-In contrast to the Hindley-Milner system, where all type constraints can
-be simply copied from one type to another, the subtyping system connects
-all polymorphic variant types via their constraints. This means that new
-constraints on one type can affect other types through the previously
-established constraints.
+\subsection{Issues encountered during Implementation}
 
-The current implementation stores these subtyping constraints in a global
-set, which has some drawbacks. The main issue is that the constraints are
-not preserved during serialization, as there is no pre-serialization phase
-that would allow us to store them in the type. This does not affect the
-typing validity within a single file, and in the case of multiple files,
-the types from other files can be taken from the interface file, which
-preserves all the necessary information in the declaration. The only problem
-arises in cases involving polymorphic variant types, where the implementation
-file's type may not be compatible with the type in the interface file as there
-is no possibility to retrieve the real type of the implemented function during
-the comparison with the one from the interface.
+The system's implementation was done in a forked repository of the OCaml compiler \cite{REPO}, based on version 4.14 of OCaml due to its stability and long-term support promise.
 
-This problem is not fundamental, and there are several solutions to fix it.
-One solution would be to serialize the constraints set or store the constraints
-related to the type in the type. However, both of these solutions would
-significantly increase the size of the serialized file. An optimal solution
-would be to add a finalization phase in which all the constraints can be
-solved and preserved in the tree as another type with only the resulting data.
+\subsubsection{Collection of subtyping constraints}
 
-\subsection{Solving types at the end of constraint collection}
+Unlike the Hindley-Milner system where all type constraints can be easily copied from one type to another, the subtyping system interconnects all polymorphic variant types via their constraints. As a result, new constraints on one type can influence other types through the previously established constraints.
 
-This problem was previously mentioned in the previous section, but it is
-important to state it independently due to its significance. In contrast
-to the HM system, which solves types during expression traversal and
-requires no final phase, the new system needs to post-process the type
-tree to solve all the polymorphic variants. This process may involve
-transforming the tree into another structure. Solving this problem requires
-significant architectural changes and a lot of work, so it has not yet been
-implemented. The current implementation solves polymorphic variant types
-before printing, which works well for now, but better architecture ideas
-should be investigated in the future.
+The current implementation houses these subtyping constraints in a global set, which presents some drawbacks. The primary issue is that these constraints are not retained during serialization, as there is no pre-serialization phase that would permit us to house them within the type. This does not impact the typing validity within a single file. For multiple files, the types from other files can be sourced from the interface file, which preserves all necessary information in the declaration. The only issue surfaces in instances involving polymorphic variant types, where the implementation file's type might not be compatible with the type in the interface file. This is due to the inability to retrieve the real type of the implemented function during comparison with the one from the interface.
 
-\subsection{Variance in unification}
+This problem is not fundamental, and several solutions exist to rectify it. One solution would be to serialize the constraints set or house the constraints related to the type within the type itself. Both of these solutions, however, would significantly inflate the size of the serialized file. An optimal solution would be to introduce a finalization phase during which all constraints could be solved and preserved in the tree as another type with only the resulting data. However, this has not been implemented as the current version is just a prototype.
 
-The main function in the HM system is unification, which is originally
-intended to make types equal. However, since we introduced subtyping, we
-need to modify the unification algorithm to make one type a subtype of the
-other type, rather than making them equal. For most classes, subtyping is
-not defined, so the function will just ignore variance and behave as before.
-The only difference is that we need to control variance changes in cases
-like arrow type.
+\subsubsection{Solving types at the end of constraint collection}
 
-For polymorphic variant types, we register a subtyping constraint in the
-global set and unify the mappings from the tags to types. For every shared
-tag, we have to unify their mapped types with the same subtyping destination
-as for the whole type. For other tags, we need to create mappings to a new
-% romanv: was not done
-type variable and then unify them, as we do with the shared tags.
+In a system based on constant solving, the actual inference of the type is carried out at the end of constraint collection. This diverges from the behavior of the Hindley-Milner system, where the type is iteratively solved, and at each point in time, it represents the most precise type that could be inferred from the current context. Although this problem was touched upon in the previous section, it warrants separate mention due to its significance.
 
-\subsection{Inequality after unification}
+This issue arises when we need to generate a list of possible tags and present the type to the user (in the case of interpretation mode through the console, or for language servers that require types to show in hints). While getting the list of possible tags was handled by an encapsulated function and didn't require significant interoperability modifications, the printing of the types lacked a preprocessing phase. Furthermore, the inference process might involve transforming the type tree, which is undesirable as this type is expected to remain unchanged and may be used in further inference. The solution implemented involved adding a preprocessing phase that infers all polymorphic variant types in the tree with the appropriate context and memorizes the result. This result is then used in the printing phase instead of the original type.
 
-During the unification process, types were made physically equal by
-assigning a reference to one of them to another. This was a valid
-optimization technique as the types that became equal were expected to
-remain equal forever, and this approach optimized memory usage for the
-compiler. However, with the new semantics, this optimization is no longer
-valid. Therefore, the solution was to remove the optimization and fix all
-the places where the unification algorithm relied on it.
+\subsubsection{Subtyping in unification}
 
-\subsection{Preserving constraints when copying types}
+The unification function in the Hindley-Milner system, which originally aims to make types equal, must be adjusted due to the introduction of subtyping. Now, it needs to convert one type into a subtype of another, rather than making them identical. In most cases, subtyping is undefined, and the function will disregard its existence, behaving as it used to. The only difference arises when we need to monitor changes in the subtyping direction, such as in cases like arrow type or type arguments. For arrow types, it's done simply by swapping the expected subtyping direction between unified types. For type arguments, it requires establishing variance on each type argument, which hasn't been completed yet.
 
-When a function application is typed in OCaml, the type of the original
-function should not be modified. To achieve this, the OCaml type checker
-creates a copy of the function type before unifying its arguments. However,
-as polymorphic variant types are associated with constraints linking them
-to other types, these constraints must be preserved during the copy. For
-instance, the subtyping relation between the result type and the argument
-type must be preserved.
+\subsubsection{Inequality after unification}
 
-To ensure this, occurrences of polymorphic variant types are tracked during
-the copy, and the constraints associated with each of them are copied after
-the full type copy is completed. Because of this, we are preserving their
-internal relations. Moreover, copied non-internal constraints become marked
-as one-directional, as they should not affect the original type, but only
-become the new constraints for the copied type.
+Following the unification process, types were made physically equal by assigning a reference from one to another. This was an acceptable approach because types that became equal were expected to remain equal indefinitely, optimizing memory usage for the compiler. However, with the new unification semantics, this optimization is invalid as types might merely be subtypes of one another. The main issue is that this technique was used not only for optimization but also for future substitutions. Thus, we cannot simply remove it as it would disrupt future unifications.
 
-\subsection{Detection of the polymorphic variables in function types}
+The apparent solution was to link only the type variables nested in the type. However, this doesn't work as those variables can be unified with the polymorphic variant type. In such instances, we must transform all unified variables into the polymorphic variant type and add all constraints that were collected for them when they were variables. Given these requirements, the only solution is to collect constraints for variables as well as for polymorphic variant types. If a variable is unified with a type that is not a variable, we must repeat all unifications with other variables that were collected as constraints for that variable.
 
-Consider the following function:
+The issue with this solution is that it necessitates significant rewriting of various parts of the typechecker, which hasn't been done yet. However, it doesn't affect the system's correctness in most cases, as variables are usually transformed into polymorphic variants before any other unifications with other variables.
 
-{\ttfamily
-fun f v =\\
-match v with\\
-| `A -> C\\
-| v \ -> v
-}
+\subsubsection{Unification of kinds}
 
-It is expected to have a type of "\texttt{$\top$ as 'a -> 'a | `C}".
-However, simply solving for both variables results in a type of
-"\texttt{$\top$ -> $\top$}" since neither of them has upper-bound constraints.
-To obtain the expected type, we need to consider that the argument type is
-present in the context when solving for the result type. Originally, this was
-achieved by physically equating the types on both sides of the arrow in the
-context. However, this method does not work in our case since the type should
-be solved with consideration of the context.
+Unification of kinds presents another challenge. This issue can be demonstrated in a scenario where we have three types, $t_1$, $t_2$, $t_3$, and we unify $t_1$ with $t_2$ and $t_2$ with $t_3$ with the same subtyping relation. In this case, the kind of $t_1$ and $t_3$ would not be directly unified. This could lead to a situation where some tags to associated type mappings are not synchronized between them. A solution is to iterate over all previously unified types and unify their kinds with the new kind. However, this could significantly impact performance and potentially result in a unification cycle in cases of backward references in associated types. Due to these reasons, the current implementation uses a disjoint-set forest \cite{DSF} to physically merge kinds that have been unified. This allows us to avoid iterating over all of the unified types, but it restricts us to providing only the semantics that this implementation allows.
 
-Therefore, two different functions were created to solve constraints: one for
-type checking without context, and another for human-readable printing with
-context.
+\subsubsection{Non-local unification failure}
 
-% \subsection{Type representation depends on the position of the variable}
+When a new constraint is introduced, it can influence all the types that are reachable within the constraint graph, even those that are not directly associated. Consequently, to monitor typing failures, we must verify the entire constraint system's solvability after incorporating any new constraint. However, iterating through all the types could negatively impact performance. The current implementation only checks the unified types, which could theoretically lead to unnoticed typing failures. Nonetheless, these would eventually be detected in a different context, causing an assertion failure, which is acceptable for the prototype implementation. The optimal solution would involve implementing online data structures that can identify typing issues without fully solving all the types.
 
-\subsection{Non-local unification failure}
+\subsubsection{Preserving constraints when copying types}
 
-When a new constraint is added, it can affect all the types that are reachable
-in the constraint graph, even if they are not directly related. Therefore, in
-order to track typing issues, we need to check the solvability of the entire
-constraint system after adding any new constraint. However, the current
-implementation simply iterates over all the types, which can negatively
-impact performance. A less complex algorithm to address this issue could be
-implemented in the future.
+In OCaml, when typing a function application, the original function's type should remain unaltered. To ensure this, the OCaml type checker makes a copy of the function type before unifying its arguments. However, as polymorphic variant types are linked to other types through constraints, these constraints need to be preserved during the copying process. For example, the subtyping relation between the result type and the argument type must be maintained.
 
-\section{Evaluation of the system}
+To achieve this, occurrences of polymorphic variant types are monitored during the copying process, and the constraints associated with each of them are copied after the complete type copy has been made. This allows us to preserve their internal relations. Moreover, the original type is resolved at the end of the copying process, and any non-internal relations that affect the resulting type are added to the copied type as independent relations.
 
-TODO
+Another issue with copying is that changes in the copied type can sometimes affect the original type, and there's no explicit flag or any other mechanism to track such cases. It depends on the internal properties of the previous representation of the polymorphic variant type, among other conditions. Also, the sharing of types is done in a manner that relies on the previous representation of the polymorphic variant type, and it does not follow the semantics of full sharing. As a result, it's unclear how to replicate such behavior in the new representation. Due to these factors, the current implementation does not preserve the sharing of types and simply copies them as independent types. This might affect the correctness in some edge cases that have not been identified yet. To rectify this problem, we need to conduct further investigation into the expected behavior.
+\section{Evaluation of the Implementation}
+
+The current implementation is not entirely correct for all code due to unresolved issues. However, it functions correctly when polymorphic variant types are used solely at the top level in the internal representations. In such instances, we observe that some programs become typeable that were not typeable before. For example:
+
+{\ttfamily\begin{verbatim}
+# let id v = match v with `A | `B -> v;;
+val id : ((`A | `B) as 'a) -> 'a = <fun>
+# id `A;;
+- : `A = `A
+# [id `A; `C'];;
+- : (`A | `C) list = [`A; `C']
+\end{verbatim}}
+
+This is the actual output of the modified compiler, whereas the original compiler would raise a type error on the last line. Another example of a program that is typed better than expected is the following:
+
+{\ttfamily\begin{verbatim}
+# let f y = match y with `A -> `C | y -> y;;
+val f : (T as 'a) -> `C | 'a = <fun>
+# f `D;;
+- : `C | `D = `D
+# f `A;;
+- : `C = `C
+\end{verbatim}}
+
+The original compiler would generate this output:
+
+{\ttfamily\begin{verbatim}
+# let f y = match y with `A -> `C | y -> y;;
+val f : ([> `A | `C ] as 'a) -> 'a = <fun>
+# f `D;;
+- : [> `A | `C | `D ] = `D
+# f `A;;
+- : [> `A | `C ] = `C
+\end{verbatim}}
+
+There is an issue with the modified compiler in that the expected associated type for tag A is not displayed in the type. However, this is merely a printing issue, as it is managed by the typechecker. Despite this, it is quite apparent that our system infers more precise types than the original one.
+
+The performance of the implemented system was not a primary goal. As a result, some internally-used algorithms were chosen simply because they were easier to implement than the optimal ones. Hence, the current implementation is significantly slower than the original one.
 
 \section{Conclusions}
 
-This work has presented a simplified version of the S-system\cite{Castagna_2016},
-that is still extends the current system for polymorphic variants in OCaml.
-Despite being less expressive than the S-system, our proposed system resolves
-several issues of the current system. Furthermore, it simplifies the type
-inference algorithm, avoids overly precise types, and requires less
-implementation effort in the OCaml compiler.
+This study has presented a streamlined version of the S-system\cite{Castagna_2016}, exhibiting greater expressiveness than the current system for polymorphic variants in OCaml. Despite being less expressive than the S-system, the proposed system we have introduced addresses several complications of the existing system. Additionally, it simplifies the type inference algorithm, avoids excessively precise types, and necessitates reduced implementation effort within the OCaml compiler.
 
-We have also provided an implementation of the proposed system, which serves
-as a proof of concept for introducing subtyping to the OCaml type system.
-While the current implementation is a working prototype, it still has some
-performance and architectural issues that need to be addressed before
-presenting it to the OCaml community. Nonetheless, we believe that our work
-provides a promising starting point for further research in this area, and
-we hope that it will inspire other researchers to explore similar ideas.
+Moreover, we have put forth an implementation of the proposed system, which acts as a proof of concept for the introduction of subtyping to the OCaml type system. It should be noted, however, that the existing implementation is a prototype and is only partially functional. There are several performance and correctness issues that must be resolved before this implementation could be presented to the OCaml community. These challenges, while significant, provide a direction for future research and development.
 
 \newpage
 
@@ -642,58 +542,58 @@ we hope that it will inspire other researchers to explore similar ideas.
 \newpage
 \thispagestyle{empty}
 
-% \begin{center}
-%   \Large \textbf{Statutory Declaration}
-%   \vspace*{8mm}
-% \end{center}
+\begin{center}
+  \Large \textbf{Statutory Declaration}
+  \vspace*{8mm}
+\end{center}
 
-% \begin{center}
-%   \begin{tabular}{|l|p{85mm}|}
-%     \hline
-%     Family Name, Given/First Name & \mylastname, \myfirstname \\
-%     Matriculation number          & \mynumber                 \\
-%     Kind of thesis submitted      & Bachelor Thesis           \\
-%     \hline
-%   \end{tabular}
-%   \vspace*{8mm}
-% \end{center}
+\begin{center}
+  \begin{tabular}{|l|p{85mm}|}
+    \hline
+    Family Name, Given/First Name & \mylastname, \myfirstname \\
+    Matriculation number          & \mynumber                 \\
+    Kind of thesis submitted      & Bachelor Thesis           \\
+    \hline
+  \end{tabular}
+  \vspace*{8mm}
+\end{center}
 
-% \subsection*{English: Declaration of Authorship}
+\subsection*{English: Declaration of Authorship}
 
-% I hereby declare that the thesis submitted was created and written
-% solely by myself without any external support. Any sources, direct
-% or indirect, are marked as such. I am aware of the fact that the
-% contents of the thesis in digital form may be revised with regard to
-% usage of unauthorized aid as well as whether the whole or parts of
-% it may be identified as plagiarism. I do agree my work to be entered
-% into a database for it to be compared with existing sources, where
-% it will remain in order to enable further comparisons with future
-% theses. This does not grant any rights of reproduction and usage,
-% however.
+I hereby declare that the thesis submitted was created and written
+solely by myself without any external support. Any sources, direct
+or indirect, are marked as such. I am aware of the fact that the
+contents of the thesis in digital form may be revised with regard to
+usage of unauthorized aid as well as whether the whole or parts of
+it may be identified as plagiarism. I do agree my work to be entered
+into a database for it to be compared with existing sources, where
+it will remain in order to enable further comparisons with future
+theses. This does not grant any rights of reproduction and usage,
+however.
 
-% This document was neither presented to any other examination board
-% nor has it been published.
+This document was neither presented to any other examination board
+nor has it been published.
 
-% \subsection*{German: Erklärung der Autorenschaft (Urheberschaft)}
+\subsection*{German: Erklärung der Autorenschaft (Urheberschaft)}
 
-% Ich erkläre hiermit, dass die vorliegende Arbeit ohne fremde Hilfe
-% ausschließlich von mir erstellt und geschrieben worden ist. Jedwede
-% verwendeten Quellen, direkter oder indirekter Art, sind als solche
-% kenntlich gemacht worden. Mir ist die Tatsache bewusst, dass der
-% Inhalt der Thesis in digitaler Form geprüft werden kann im Hinblick
-% darauf, ob es sich ganz oder in Teilen um ein Plagiat handelt. Ich
-% bin damit einverstanden, dass meine Arbeit in einer Datenbank
-% eingegeben werden kann, um mit bereits bestehenden Quellen
-% verglichen zu werden und dort auch verbleibt, um mit zukünftigen
-% Arbeiten verglichen werden zu können. Dies berechtigt jedoch nicht
-% zur Verwendung oder Vervielfältigung.
+Ich erkläre hiermit, dass die vorliegende Arbeit ohne fremde Hilfe
+ausschließlich von mir erstellt und geschrieben worden ist. Jedwede
+verwendeten Quellen, direkter oder indirekter Art, sind als solche
+kenntlich gemacht worden. Mir ist die Tatsache bewusst, dass der
+Inhalt der Thesis in digitaler Form geprüft werden kann im Hinblick
+darauf, ob es sich ganz oder in Teilen um ein Plagiat handelt. Ich
+bin damit einverstanden, dass meine Arbeit in einer Datenbank
+eingegeben werden kann, um mit bereits bestehenden Quellen
+verglichen zu werden und dort auch verbleibt, um mit zukünftigen
+Arbeiten verglichen werden zu können. Dies berechtigt jedoch nicht
+zur Verwendung oder Vervielfältigung.
 
-% Diese Arbeit wurde noch keiner anderen Prüfungsbehörde vorgelegt
-% noch wurde sie bisher veröffentlicht.
+Diese Arbeit wurde noch keiner anderen Prüfungsbehörde vorgelegt
+noch wurde sie bisher veröffentlicht.
 
-% \vspace{20mm}
+\vspace{20mm}
 
-% \dotfill\\
-% Date, Signature
+\dotfill\\
+Date, Signature
 
 \end{document}

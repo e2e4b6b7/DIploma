@@ -1,15 +1,17 @@
 [0] Config.pm:307> INFO - This is Biber 2.17
-[0] Config.pm:310> INFO - Logfile is 'build/diploma.blg'
-[119] biber:340> INFO - === Sun May 14, 2023, 19:31:55
-[145] Biber.pm:418> INFO - Reading 'build/diploma.bcf'
-[239] Biber.pm:972> INFO - Found 6 citekeys in bib section 0
-[257] Biber.pm:4383> INFO - Processing section 0
-[272] Biber.pm:4574> INFO - Looking for bibtex file 'citations.bib' for section 0
-[274] bibtex.pm:1713> INFO - LaTeX decoding ...
-[288] bibtex.pm:1518> INFO - Found BibTeX data source 'citations.bib'
-[441] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
-[441] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[441] Biber.pm:4203> INFO - Sorting list 'nty/global//global/global' of type 'entry' with template 'nty' and locale 'en-US'
-[442] Biber.pm:4209> INFO - No sort tailoring available for locale 'en-US'
-[460] bbl.pm:654> INFO - Writing 'build/diploma.bbl' with encoding 'UTF-8'
-[471] bbl.pm:757> INFO - Output to build/diploma.bbl
+[1] Config.pm:310> INFO - Logfile is 'build/diploma.blg'
+[182] biber:340> INFO - === Tue May 16, 2023, 01:38:37
+[223] Biber.pm:418> INFO - Reading 'build/diploma.bcf'
+[389] Biber.pm:972> INFO - Found 12 citekeys in bib section 0
+[414] Biber.pm:4383> INFO - Processing section 0
+[436] Biber.pm:4574> INFO - Looking for bibtex file 'citations.bib' for section 0
+[439] bibtex.pm:1713> INFO - LaTeX decoding ...
+[476] bibtex.pm:1518> INFO - Found BibTeX data source 'citations.bib'
+[675] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[676] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[676] Biber.pm:4203> INFO - Sorting list 'nty/global//global/global' of type 'entry' with template 'nty' and locale 'en-US'
+[676] Biber.pm:4209> INFO - No sort tailoring available for locale 'en-US'
+[710] bbl.pm:654> INFO - Writing 'build/diploma.bbl' with encoding 'UTF-8'
+[721] bbl.pm:757> INFO - Output to build/diploma.bbl
+[721] Biber.pm:130> WARN - legacy month field 'may' in entry 'DSF' is not an integer - this will probably not sort properly.
+[721] Biber.pm:132> INFO - WARNINGS: 1
